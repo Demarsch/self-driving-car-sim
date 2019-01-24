@@ -1,0 +1,20 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#world {
+    margin: auto;
+    width: 1024px;
+    height: 768px;
+}
+
+.toolbar {
+    width: 400px;
+    height: 40px;
+}
