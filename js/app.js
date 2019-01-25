@@ -7,6 +7,7 @@ var Engine = Matter.Engine,
     Events = Matter.Events,
     Query = Matter.Query,
     Body = Matter.Body,
+    Vector = Matter.Vector,
     MouseConstraint = Matter.MouseConstraint,
     Mouse = Matter.Mouse;
     
@@ -147,34 +148,53 @@ Events.on(render, 'afterRender', function() {
         bodies = allBodies, //Composite.allBodies(engine.world),
         startPoint = { x: width / 2, y: height / 2 },
         endPoint = mouse.position;
-
-    var collisions = raycast(bodies, startPoint, endPoint);
-    // var collisions = Query.ray(bodies, startPoint, endPoint);
-
-    for (var i = 0; i < collisions.length; i++) {
-
-        Render.startViewTransform(render);
-
-        context.beginPath();
-        var collision = collisions[i];
-        
-        context.moveTo(startPoint.x, startPoint.y);
-        context.lineTo(collision.point.x, collision.point.y);
-        if (collisions.length > 0) {
-            context.strokeStyle = '#fff';
+    
+    var fovDist = 200;
+    var forwardVec = Vector.create(fovDist * car.axes[1].x, fovDist * car.axes[1].y);
+    var degree = Math.PI / 180;
+    Render.startViewTransform(render);
+    for (var i = -180; i <= 180; i++) {
+        var deltaAngle = i * degree;
+        var angleVector = Vector.add(Vector.rotate(forwardVec, deltaAngle), car.position);
+        var collisions = raycast(bodies, car.position, angleVector);
+        if (collisions.length === 0) {
+            context.fillStyle = 'rgba(255,255,255,0.7)';
+            context.fillRect(angleVector.x, angleVector.y, 1, 1);
         } else {
-            context.strokeStyle = '#555';
+            context.fillStyle = i < -90 || i > 90 ? 'yellow' : 'red';
+            var collision = collisions[0];
+            context.fillRect(collision.point.x - 1, collision.point.y - 1, 3, 3);
         }
-        context.lineWidth = 0.5;
-        context.stroke();
-
-        context.rect(collision.point.x, collision.point.y, 4, 4);
-        context.fillStyle = 'rgba(255,165,0,0.7)';
-        context.fill();
-
-        Render.endViewTransform(render);
-        break;
     }
+    Render.endViewTransform(render);
+
+    // var collisions = raycast(bodies, startPoint, endPoint);
+    // // var collisions = Query.ray(bodies, startPoint, endPoint);
+
+    // for (var i = 0; i < collisions.length; i++) {
+
+    //     Render.startViewTransform(render);
+
+    //     context.beginPath();
+    //     var collision = collisions[i];
+        
+    //     context.moveTo(startPoint.x, startPoint.y);
+    //     context.lineTo(collision.point.x, collision.point.y);
+    //     if (collisions.length > 0) {
+    //         context.strokeStyle = '#fff';
+    //     } else {
+    //         context.strokeStyle = '#555';
+    //     }
+    //     context.lineWidth = 0.5;
+    //     context.stroke();
+
+    //     context.rect(collision.point.x - 2, collision.point.y - 2, 4, 4);
+    //     context.fillStyle = 'rgba(255,165,0,0.7)';
+    //     context.fill();
+
+    //     Render.endViewTransform(render);
+    //     break;
+    // }
 });
 
 // add mouse control
