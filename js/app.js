@@ -3,8 +3,13 @@ var Engine = Matter.Engine,
     Render = Matter.Render,
     World = Matter.World,
     Bodies = Matter.Bodies,
+    Composite = Matter.Composite,
     Events = Matter.Events,
-    Body = Matter.Body;
+    Query = Matter.Query,
+    Body = Matter.Body,
+    MouseConstraint = Matter.MouseConstraint,
+    Mouse = Matter.Mouse;
+    
 
 // create an engine
 var engine = Engine.create();
@@ -29,7 +34,7 @@ var render = Render.create({
 
 //Add world boundaries
 var offset = 5;
-World.add(engine.world, [
+var bounds = [
     //Top
     Bodies.rectangle(width / 2, offset, width, 2 * offset, { isStatic: true }),
     //Right
@@ -38,16 +43,20 @@ World.add(engine.world, [
     Bodies.rectangle(width / 2, height - offset, width, 2 * offset, { isStatic: true }),
     //Left
     Bodies.rectangle(offset, height / 2, 2 * offset, height, { isStatic: true })
-]);
+];
+World.add(engine.world, bounds);
 
 //Add some obstacles
-
-World.add(engine.world, [
+var obstacles = [
     Bodies.circle(200, 200, 40, { isStatic: true }),
     Bodies.circle(width - 200, 200, 40, { isStatic: true }),
     Bodies.circle(width - 200, height - 200, 40, { isStatic: true }),
     Bodies.circle(200, height - 200, 40, { isStatic: true })
-]);
+];
+
+World.add(engine.world, obstacles);
+
+var allBodies = obstacles.concat(bounds);
 
 //Create our car
 var car = Bodies.rectangle(width / 2, height / 2, 50, 25, {
@@ -63,11 +72,16 @@ Engine.run(engine);
 
 let ts = 0;
 
-var velocityInc = 0.0025;
-var angleInc = 0.015;
-var updateFreq = 70
+var velocityInc = 0.003;
+var angleInc = 0.03;
+var updateFreq = 40
+
+var isRunning = false;
 
 Events.on(engine, 'beforeUpdate', e => {
+    if (!isRunning) {
+        return;
+    }
     if (e.timestamp > ts + updateFreq) {
         if (Math.random() < 0.8) {
             speedUp();
@@ -102,13 +116,9 @@ function slowDown() {
     Body.applyForce(car, car.position, {x: -velocityInc * forward.x, y: -velocityInc * forward.y }); 
 }
 
-$('#turnLeft').click(() => { turnLeft(); ts += 1.5 * updateFreq; });
+$('#start').click(() => isRunning = true);
 
-$('#turnRight').click(() => { turnRight(); ts += 1.5 * updateFreq; });
-
-$('#speedUp').click(() => { speedUp(); ts += 1.5 * updateFreq; });
-
-$('#slowDown').click(() => { slowDown(); ts += 1.5 * updateFreq; });
+$('#stop').click(() => isRunning = false);
 
 $(document).on('keydown', e => {
     switch (e.keyCode) {
@@ -128,7 +138,63 @@ $(document).on('keydown', e => {
         case 40:
             slowDown();
             break;
-        case 48:
-            break;
     }
+});
+
+Events.on(render, 'afterRender', function() {
+    var mouse = mouseConstraint.mouse,
+        context = render.context,
+        bodies = allBodies, //Composite.allBodies(engine.world),
+        startPoint = { x: width / 2, y: height / 2 },
+        endPoint = mouse.position;
+
+    var collisions = raycast(bodies, startPoint, endPoint);
+    // var collisions = Query.ray(bodies, startPoint, endPoint);
+
+    for (var i = 0; i < collisions.length; i++) {
+
+        Render.startViewTransform(render);
+
+        context.beginPath();
+        var collision = collisions[i];
+        
+        context.moveTo(startPoint.x, startPoint.y);
+        context.lineTo(collision.point.x, collision.point.y);
+        if (collisions.length > 0) {
+            context.strokeStyle = '#fff';
+        } else {
+            context.strokeStyle = '#555';
+        }
+        context.lineWidth = 0.5;
+        context.stroke();
+
+        context.rect(collision.point.x, collision.point.y, 4, 4);
+        context.fillStyle = 'rgba(255,165,0,0.7)';
+        context.fill();
+
+        Render.endViewTransform(render);
+        break;
+    }
+});
+
+// add mouse control
+var mouse = Mouse.create(render.canvas),
+    mouseConstraint = MouseConstraint.create(engine, {
+        mouse: mouse,
+        constraint: {
+            stiffness: 0.2,
+            render: {
+                visible: true
+            }
+        }
+    });
+
+World.add(engine.world, mouseConstraint);
+
+// keep the mouse in sync with rendering
+render.mouse = mouse;
+
+Render.lookAt(render, {
+    min: { x: 0, y: 0 },
+    max: { x: width, y: height }
 });
