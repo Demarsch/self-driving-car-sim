@@ -15,7 +15,7 @@ const fovDistance = 150;
 //FoV angle in radians. Centered around cars front
 const fovAngle = 2 * Math.PI;
 //Number of sensors that the car has. Distributed evenly across car's FoV angle
-const fovSensors = 90;
+const fovSensors = 360;
 
 let Engine = Matter.Engine,
     Render = Matter.Render,
@@ -100,6 +100,7 @@ let ts = 0;
 let isAutoMove = false;
 
 Events.on(engine, 'beforeUpdate', e => {
+    car.updateSensorData(allObstacles);
     if (e.timestamp < ts + tickFrequency) {
         return;
     }
@@ -108,7 +109,6 @@ Events.on(engine, 'beforeUpdate', e => {
     if (isAutoMove && !keyboardActions.has(car.moveForward)) {
         car.moveForward();
     }
-    car.updateSensorData(allObstacles);
 });
 
 const keys = new Set();
@@ -156,12 +156,13 @@ Events.on(render, 'afterRender', function() {
         for (let i = 0; i < sensorData.length; i++) {
             let sensor = sensorData[i];
             if (sensor.collides) {
-                context.fillStyle = 'red';
+                context.fillStyle = 'red';                
+                context.fillRect(sensor.point.x - 2, sensor.point.y - 2, 3, 3);
             } else {
-                context.fillStyle = 'white';
+                context.fillStyle = 'white';                
+                context.fillRect(sensor.point.x, sensor.point.y, 1, 1);
             }
-            context.fillRect(sensor.point.x - 1, sensor.point.y - 1, 2, 2);
         }
     }
     Render.endViewTransform(render);
-});
+}); 
