@@ -1,28 +1,39 @@
-// module aliases
-var Engine = Matter.Engine,
+let worldEl = $('#world');
+let width = worldEl.width();
+let height = worldEl.height();
+let showFov = true;
+
+const carWidth = 25;
+const carHeight = 50;
+const carRestitution = 0.3;
+const carFriction = 0.05;
+//We want the car to move smoothly, but to process car state less frequently
+const tickFrequency = 50;
+const velocityIncrement = 0.003;
+const angleIncrement = 0.03;
+const fovDistance = 150;
+//FoV angle in radians. Centered around cars front
+const fovAngle = 2 * Math.PI;
+//Number of sensors that the car has. Distributed evenly across car's FoV angle
+const fovSensors = 90;
+
+let Engine = Matter.Engine,
     Render = Matter.Render,
     World = Matter.World,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite,
     Events = Matter.Events,
     Query = Matter.Query,
-    Body = Matter.Body,
-    Vector = Matter.Vector,
     MouseConstraint = Matter.MouseConstraint,
     Mouse = Matter.Mouse;
-    
 
-// create an engine
-var engine = Engine.create();
+// No gravity, as we percieve our world from above - thus all bodies technically float in the air
+let engine = Engine.create();
 engine.world.gravity.x = 0;
 engine.world.gravity.y = 0;
 
-var worldEl = $('#world');
-
-var width = worldEl.width();
-var height = worldEl.height();
-// create a renderer
-var render = Render.create({
+// Create a renderer
+let render = Render.create({
     element: worldEl[0],
     engine: engine,
     options: {
@@ -33,188 +44,124 @@ var render = Render.create({
     }
 });
 
+// Run the renderer
+Render.run(render);
+
+let allObstacles = [];
 //Add world boundaries
-var offset = 5;
-var bounds = [
+let boundsOffset = 10;
+let bounds = [
     //Top
-    Bodies.rectangle(width / 2, offset, width, 2 * offset, { isStatic: true }),
+    Bodies.rectangle(width / 2, boundsOffset / 2, width, boundsOffset, { isStatic: true }),
     //Right
-    Bodies.rectangle(width - offset, height / 2, 2 * offset, height, { isStatic: true }),
+    Bodies.rectangle(width - boundsOffset / 2, height / 2, boundsOffset, height, { isStatic: true }),
     //Bottom
-    Bodies.rectangle(width / 2, height - offset, width, 2 * offset, { isStatic: true }),
+    Bodies.rectangle(width / 2, height - boundsOffset / 2, width, boundsOffset, { isStatic: true }),
     //Left
-    Bodies.rectangle(offset, height / 2, 2 * offset, height, { isStatic: true })
+    Bodies.rectangle(boundsOffset / 2, height / 2, boundsOffset, height, { isStatic: true })
 ];
 World.add(engine.world, bounds);
+allObstacles.splice(0, 0, ...bounds);
 
-//Add some obstacles
-var obstacles = [
+// Add some obstacles
+let obstacles = [
     Bodies.circle(200, 200, 40, { isStatic: true }),
     Bodies.circle(width - 200, 200, 40, { isStatic: true }),
     Bodies.circle(width - 200, height - 200, 40, { isStatic: true }),
     Bodies.circle(200, height - 200, 40, { isStatic: true })
 ];
-
 World.add(engine.world, obstacles);
+allObstacles.splice(-1, 0, ...obstacles);
 
-var allBodies = obstacles.concat(bounds);
-
-//Create our car
-var car = Bodies.rectangle(width / 2, height / 2, 50, 25, {
-    restitution: 0.3,
-    frictionAir: 0.05
+// Create our car
+let carBody = Bodies.rectangle(width / 2, height / 2, carHeight, carWidth, {
+    restitution: carRestitution,
+    frictionAir: carFriction
 });
-//car.frictionAir = 0;
-Body.rotate(car, Math.PI / 2);
-World.add(engine.world, car);
+Body.rotate(carBody, Math.PI / 2);
+World.add(engine.world, carBody);
 
-// run the engine
+let car = new Car(carBody, {
+    velocityIncrement: velocityIncrement,
+    angleIncrement: angleIncrement,
+    fovDistance: fovDistance,
+    fovSensors: fovSensors,
+    fovAngle: fovAngle
+});
+
+// Add mouse control
+let mouse = Mouse.create(render.canvas);
+// Keep the mouse in sync with rendering
+render.mouse = mouse;
+
+// Run the engine
 Engine.run(engine);
-
 let ts = 0;
-
-var velocityInc = 0.003;
-var angleInc = 0.03;
-var updateFreq = 40
-
-var isRunning = false;
+let isAutoMove = false;
 
 Events.on(engine, 'beforeUpdate', e => {
-    if (!isRunning) {
+    if (e.timestamp < ts + tickFrequency) {
         return;
     }
-    if (e.timestamp > ts + updateFreq) {
-        if (Math.random() < 0.8) {
-            speedUp();
-        } else {
-            //turnLeft();
-        }
-        ts = e.timestamp;
+    ts = e.timestamp;
+    let keyboardActions = keyboardHandler();
+    if (isAutoMove && !keyboardActions.has(car.moveForward)) {
+        car.moveForward();
     }
+    car.updateSensorData(allObstacles);
 });
 
-// run the renderer
-Render.run(render);
+const keys = new Set();
 
- function turnLeft() { car.torque = -angleInc; }
- function turnRight() { car.torque = angleInc; }
-// function turnLeft() { 
-//     let left = car.axes[0];     
-//     let forward = car.axes[1];
-//     Body.applyForce(car, { x: car.position.x + forward.x * 50, y: car.position.y + forward.y * 25 }, {x: angleInc * left.x, y: angleInc * left.y });
-// }
-// function turnRight() {
-//     let left = car.axes[0];    
-//     let forward = car.axes[1];
-//     Body.applyForce(car, { x: car.position.x + forward.x * 50, y: car.position.y + forward.y * 25 }, {x: -angleInc * left.x, y: -angleInc * left.y }); 
-// }
-function speedUp() { 
-    let forward = car.axes[1];
-    Body.applyForce(car, car.position, {x: velocityInc * forward.x , y: velocityInc * forward.y }); 
-}
-function slowDown() {    
-    let forward = car.axes[1];
-    Body.applyForce(car, car.position, {x: -velocityInc * forward.x, y: -velocityInc * forward.y }); 
-}
-
-$('#start').click(() => isRunning = true);
-
-$('#stop').click(() => isRunning = false);
-
-$(document).on('keydown', e => {
-    switch (e.keyCode) {
-        //Left
-        case 37:
-            turnLeft();
-            break;
-        //Up
-        case 38:
-            speedUp();
-            break;
-        //Right
-        case 39:
-            turnRight();
-            break;
-        //Down
-        case 40:
-            slowDown();
-            break;
+function keyboardHandler() {
+    let result = new Set();
+    //Left
+    if (keys.has(37)) {
+        result.add(car.turnLeft);
+        car.turnLeft();
     }
-});
+    //Up
+    if (keys.has(38)) {
+        result.add(car.moveForward);
+        car.moveForward();
+    }
+    //Right
+    if (keys.has(39)) {
+        result.add(car.turnRight);
+        car.turnRight();
+    }
+    //Down
+    if (keys.has(40)) {
+        result.add(car.moveBackward);
+        car.moveBackward();
+    }
+    return result;
+}
+
+$(document).on('keydown', e => keys.add(e.keyCode));
+$(document).on('keyup', e => keys.delete(e.keyCode));
+
+$('#start').click(() => isAutoMove = true);
+
+$('#stop').click(() => isAutoMove = false);
 
 Events.on(render, 'afterRender', function() {
-    var mouse = mouseConstraint.mouse,
-        context = render.context,
-        bodies = allBodies, //Composite.allBodies(engine.world),
-        startPoint = { x: width / 2, y: height / 2 },
-        endPoint = mouse.position;
-    
-    var fovDist = 200;
-    var forwardVec = Vector.create(fovDist * car.axes[1].x, fovDist * car.axes[1].y);
-    var degree = Math.PI / 180;
+    let sensorData = car.sensorData;
+    if (!sensorData) {
+        return;
+    }
+    let context = render.context;
     Render.startViewTransform(render);
-    for (var i = -180; i <= 180; i++) {
-        var deltaAngle = i * degree;
-        var angleVector = Vector.add(Vector.rotate(forwardVec, deltaAngle), car.position);
-        var collisions = raycast(bodies, car.position, angleVector);
-        if (collisions.length === 0) {
-            context.fillStyle = 'rgba(255,255,255,0.7)';
-            context.fillRect(angleVector.x, angleVector.y, 1, 1);
-        } else {
-            context.fillStyle = i < -90 || i > 90 ? 'yellow' : 'red';
-            var collision = collisions[0];
-            context.fillRect(collision.point.x - 1, collision.point.y - 1, 3, 3);
+    if (showFov) {        
+        for (let i = 0; i < sensorData.length; i++) {
+            let sensor = sensorData[i];
+            if (sensor.collides) {
+                context.fillStyle = 'red';
+            } else {
+                context.fillStyle = 'white';
+            }
+            context.fillRect(sensor.point.x - 1, sensor.point.y - 1, 2, 2);
         }
     }
     Render.endViewTransform(render);
-
-    // var collisions = raycast(bodies, startPoint, endPoint);
-    // // var collisions = Query.ray(bodies, startPoint, endPoint);
-
-    // for (var i = 0; i < collisions.length; i++) {
-
-    //     Render.startViewTransform(render);
-
-    //     context.beginPath();
-    //     var collision = collisions[i];
-        
-    //     context.moveTo(startPoint.x, startPoint.y);
-    //     context.lineTo(collision.point.x, collision.point.y);
-    //     if (collisions.length > 0) {
-    //         context.strokeStyle = '#fff';
-    //     } else {
-    //         context.strokeStyle = '#555';
-    //     }
-    //     context.lineWidth = 0.5;
-    //     context.stroke();
-
-    //     context.rect(collision.point.x - 2, collision.point.y - 2, 4, 4);
-    //     context.fillStyle = 'rgba(255,165,0,0.7)';
-    //     context.fill();
-
-    //     Render.endViewTransform(render);
-    //     break;
-    // }
-});
-
-// add mouse control
-var mouse = Mouse.create(render.canvas),
-    mouseConstraint = MouseConstraint.create(engine, {
-        mouse: mouse,
-        constraint: {
-            stiffness: 0.2,
-            render: {
-                visible: true
-            }
-        }
-    });
-
-World.add(engine.world, mouseConstraint);
-
-// keep the mouse in sync with rendering
-render.mouse = mouse;
-
-Render.lookAt(render, {
-    min: { x: 0, y: 0 },
-    max: { x: width, y: height }
 });
