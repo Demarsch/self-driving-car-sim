@@ -1,3 +1,7 @@
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -7,16 +11,48 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    background-color: white;
 }
 
-#world {
-    margin: auto;
-    width: 1024px;
-    height: 768px;
+.world {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toolbar {
-    width: 400px;
-    height: 40px;
+    position: fixed;
+    left: 50%;
+    top: -1px;
+    background: white;
+    transform: translate(-50%,0);
+    padding: 0.5rem;
+    border: 1px solid #4c1daa;
+    opacity: 0.2;
+}
+
+.toolbar:hover {
+    opacity: 1;
+}
+
+.toolbar .btn {
+    border-radius: 0;
+    border: 1px dashed #4c1daa;
+    margin: 0 1rem;
+}
+
+.toolbar .btn:hover {    
+    border: 2px solid #4c1daa;
+    margin: -1px calc(1rem - 1px);
+}
+
+.toolbar .btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.toolbar .btn.on {
+    box-shadow: 0px 0px 6px 3px #4c1daa;
 }
