@@ -19,10 +19,14 @@
     <div class="world"></div>
     <nav class="nav toolbar">
         <button id="reset" class="btn" title="Randomize car position"><img src="img/reset.png"></button>
+        <button id="explosion" class="btn" title="Chaotically shuffle all obstacles"><img src="img/explosion.png"></button>
+        <div class="separator"></div>
         <button id="sensors" class="btn" title="Toggle car sensors"><img src="img/sensor.png"></button>
         <button id="spotlight" class="btn" title="Toggle spotlight mode"><img src="img/spotlight.png"></button>
         <button id="move" class="btn" title="Run auto-movement"><img src="img/move.png"></button>
-        <button id="record" class="btn" title="Start/pause/resume recording of user actions"><img src="img/recording.png"></button>
+        <button id="config" class="btn" title="Settings &amp; configuration"><img src="img/settings.png"></button>
+        <div class="separator"></div>
+        <button id="recording" class="btn" title="Start/pause/resume recording of user actions"><img src="img/recording.png"></button>
         <div class="recording-container">
             <button id="applyModel" class="btn" title="Train car based on current recording"><img src="img/apply.png"></button>
             <button id="discardModel" class="btn" title="Forget everything and start from scratch"><img src="img/remove.png"></button>
@@ -31,6 +35,7 @@
             </div>  
         </div>      
     </nav>
+    <button id="toggleToolbarButton"></button>
 
     <div id="progressModal" class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">

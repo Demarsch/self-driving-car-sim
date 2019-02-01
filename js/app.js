@@ -7,6 +7,7 @@ const mainColor = '#4c1daa';
 //Car parameters
 const carWidth = 25;
 const obstacleSize = carWidth;
+const obstacleMass = 1e8;
 const carHeight = 50;
 const carRestitution = 0.3;
 const carFriction = 0.05;
@@ -208,6 +209,13 @@ $(document).on('keydown', e => {
     //Arrow keys
     if (e.keyCode >= 37 && e.keyCode <= 40) {
         keys.add(e.keyCode);
+    //CTRL + Z
+    } else if (e.ctrlKey && e.keyCode == 90) {
+        let obstacle = obstacles.pop();
+        if (obstacle) {
+            World.remove(engine.world, obstacle);
+            allObstacles.pop();
+        }
     }
 });
 
@@ -325,21 +333,26 @@ function toggleAutoMove(on) {
 }
 
 function toggleRecording(on) {
-    let btn = $('#record');   
+    let btn = $('#recording');   
     isRecording = typeof on === 'undefined' ? !isRecording : on;
     btn.toggleClass('on', isRecording);
-    let showRecordingContainer = isRecording || learningData.length;
-    let container = $('.recording-container');
-    if (showRecordingContainer) {
-        container.show();
-    } else {
-        container.hide();
-    }
+    let enableRecordingContainer = isRecording || learningData.length;
+    $('.recording-container *').prop('disabled', !enableRecordingContainer);
 }
 
 $('#reset').click(() => {
     Body.setPosition(carBody,  { x: width * (0.1 + 0.8 * Math.random()), y: height * (0.1 + 0.8 * Math.random()) });
     Body.setAngle(carBody, Math.random() * Math.PI);
+});
+
+$('#explosion').click(() => {
+    var forceMagnitude = obstacleMass / 90;
+    for (let obstacle of obstacles) {
+        Body.applyForce(obstacle, obstacle.position, {
+            x: (forceMagnitude + Common.random() * forceMagnitude) * Common.choose([1, -1]), 
+            y: -forceMagnitude + Common.random() * -forceMagnitude
+        });        
+    }
 });
 
 let mouseDownPosition;
@@ -367,27 +380,31 @@ $(document).click(e => {
     }
     if (e.button === 0) { 
         let mouseUpPosition = mouse.position;
-        if (mouseUpPosition.x === mouseDownPosition.x && mouseUpPosition.y === mouseDownPosition.y) {
+        let distance = Math.sqrt((mouseUpPosition.x - mouseDownPosition.x) ** 2 + (mouseUpPosition.y - mouseDownPosition.y) ** 2);
+        if (distance < obstacleSize) {
             obstacle = Bodies.circle(mouseUpPosition.x, mouseUpPosition.y, obstacleSize, {
-                isStatic: true,
+                isStatic: false,
+                restitution: 0.6,
                 render: {
                     fillStyle: mainColor
                 }
             });
+            Body.setMass(obstacle, obstacleMass);
         } else {
-            let length = Math.sqrt((mouseUpPosition.x - mouseDownPosition.x) ** 2 + (mouseUpPosition.y - mouseDownPosition.y) ** 2);
-            let angle = Math.asin((mouseUpPosition.y - mouseDownPosition.y) / length) * (Math.sign(mouseUpPosition.x - mouseDownPosition.x) || 1);
+            let angle = Math.asin((mouseUpPosition.y - mouseDownPosition.y) / distance) * (Math.sign(mouseUpPosition.x - mouseDownPosition.x) || 1);
             let center = {
                 x: mouseDownPosition.x + (mouseUpPosition.x - mouseDownPosition.x) / 2,
                 y: mouseDownPosition.y + (mouseUpPosition.y - mouseDownPosition.y) / 2
             }
-            obstacle = Bodies.rectangle(center.x, center.y, length, 10, {
-                isStatic: true,
+            obstacle = Bodies.rectangle(center.x, center.y, distance, 6, {
+                isStatic: false,
+                restitution: 0.6,
                 render: {
                     fillStyle: mainColor
                 }
             });
             Body.setAngle(obstacle, angle);
+            Body.setMass(obstacle, obstacleMass);
         }
         World.add(engine.world, obstacle);
         obstacles.push(obstacle);
@@ -427,17 +444,24 @@ $('#move').click(e => {
     toggleAutoMove();
 });
 
-$('#record').click(e => {
+$('#recording').click(e => {
     e.stopPropagation();
     toggleAutoMove(false);
     toggleRecording();
     if (isRecording) {
         toggleSensors(true);
+        if (!learningData.length && currentModel) {
+            currentModel.dispose();
+            currentModel = null;
+        }
     }
 });
 
 $('#applyModel').click(async e => {
     e.stopPropagation();
+    if (!learningData.length) {
+        return;
+    }
     const epochs = 30;
     let modal = $('#progressModal');
     modal.modal('show');
@@ -467,6 +491,7 @@ $('#applyModel').click(async e => {
             epochs: epochs,
             yieldEvery : 'epoch'
         });
+        currentModel.dispose();
         currentModel = model;
     } finally {
         if (xs) {
@@ -491,7 +516,14 @@ $('#discardModel').click(e => {
     $('#learnedIterations').text(`nothing`);
 });
 
-$('.recording-container').hide();
+$('#toggleToolbarButton').on('mousedown', e => e.stopPropagation());
+
+$('#toggleToolbarButton').click(e => {
+    e.stopPropagation();
+    $('.toolbar').toggle();
+});
+
+$('.recording-container *').prop('disabled', true);
 
 tf.loadModel('./agent/trained-agent.json')
     .then(m => { 
