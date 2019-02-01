@@ -17,7 +17,7 @@ body {
 
 .overlay {
     position: fixed;
-    background-image: url(/img/carbon.jpg);
+    background-image: url(img/carbon.jpg);
     top: 0;
     right: 0;
     bottom: 0;
@@ -154,7 +154,7 @@ body {
     text-transform: uppercase;
     padding: 1rem 2rem;
     box-shadow: 0 0 20px 10px #4c1daa;
-    background-image: url(/img/carbon.jpg);
+    background-image: url(img/carbon.jpg);
     background-color: #4c1daa70;
     transition: all 0.3s;
     text-shadow: 3px 3px darkslateblue;
@@ -203,7 +203,7 @@ body {
     border-width: 0 1px 1px 1px;
     border-style: solid;
     border-color: #4c1daa;
-    background-image: url(/img/up-down.png);
+    background-image: url(img/up-down.png);
     background-repeat: no-repeat;
     background-position: center;
 }
