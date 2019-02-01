@@ -13,6 +13,8 @@
     <script src="js/matter.min.js"></script>
     <script src="js/raycast.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.14.2/dist/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.0/bootstrap-slider.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.0/css/bootstrap-slider.min.css"></script>
     <link rel="stylesheet" type="text/css" media="screen" href="css/styles.css" />
 </head>
 <body>
@@ -24,18 +26,39 @@
         <button id="sensors" class="btn" title="Toggle car sensors"><img src="img/sensor.png"></button>
         <button id="spotlight" class="btn" title="Toggle spotlight mode"><img src="img/spotlight.png"></button>
         <button id="move" class="btn" title="Run auto-movement"><img src="img/move.png"></button>
-        <button id="config" class="btn" title="Settings &amp; configuration"><img src="img/settings.png"></button>
         <div class="separator"></div>
         <button id="recording" class="btn" title="Start/pause/resume recording of user actions"><img src="img/recording.png"></button>
         <div class="recording-container">
             <button id="applyModel" class="btn" title="Train car based on current recording"><img src="img/apply.png"></button>
             <button id="discardModel" class="btn" title="Forget everything and start from scratch"><img src="img/remove.png"></button>
             <div class="learned-iterations">
-                <span>Remembered </span><span id="learnedIterations">nothing</span><span> so far</span>
+                <span id="learnedIterations">Nothing</span><span> learned so far</span>
             </div>  
         </div>      
+        <div class="separator"></div>
+        <button id="help" class="btn" title="Help &amp; about"><img src="img/information.png"></button>
     </nav>
     <button id="toggleToolbarButton"></button>
+
+    <div class="overlay overlay-top-left"></div>
+    <div class="overlay overlay-top-right"></div>
+    <div class="overlay overlay-bottom-right"></div>
+    <div class="overlay overlay-bottom-left"></div>
+
+    <div class="overlay overlay-header">
+        <p><span class="first-letter">M</span>ini <span class="first-letter">L</span>essons <span class="first-letter">T</span>end to <span class="first-letter">F</span>ortify <span class="first-letter">J</span>aded <span class="first-letter">S</span>tudents</p>
+    </div>
+
+    <footer class="overlay overlay-footer">
+        <p class="my-credit">Designed and developed by Andrei Chaplygin</p>
+        <a href="https://github.com/Demarsch" target="_blank" title="Find me on GitHub"><img src="/img/github.png"></a>
+        <a href="https://www.linkedin.com/in/andrei-chaplygin/" target="_blank" title="Connect with me on LinkedIn"><img src="/img/linkedin.png"></a>
+        <a href="https://stackoverflow.com/users/1531189/demarsch" target="_blank" title="Check my profile on StackOverflow"><img src="/img/stack-overflow.png"></a>
+        <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+        <a target="_blank" href="https://www.brusheezy.com/">Photoshop brushes by Brusheezy!</a>
+    </footer>
+
+    <button class="btn btn-overlay">Get me behind the wheel!</button>
 
     <div id="progressModal" class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">

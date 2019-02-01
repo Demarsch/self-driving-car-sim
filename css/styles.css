@@ -1,5 +1,6 @@
 * {
     font-family: 'Roboto', sans-serif;
+    color: #4c1daa;
 }
 
 html, body {
@@ -12,6 +13,160 @@ body {
     display: flex;
     flex-direction: column;
     background-color: white;
+}
+
+.overlay {
+    position: fixed;
+    background-image: url(/img/carbon.jpg);
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-color: #4c1daaaa;
+    border-style: solid;
+    transition: transform 1s ease-in;
+}
+
+.overlay-top-left {
+    right: 50%;
+    bottom: 50%;
+    border-width: 0 3px 3px 0;
+}
+
+.overlay-top-left.off {
+    transform: translate(-100%, -100%);
+}
+
+.overlay-top-right {
+    left: 50%;
+    bottom: 50%;
+    border-width: 0 0 3px 3px;
+}
+
+.overlay-top-right.off {
+    transform: translate(100%, -100%);
+}
+
+.overlay-bottom-left {
+    right: 50%;
+    top: 50%;    
+    border-width: 3px 3px 0 0;
+}
+
+.overlay-bottom-left.off {
+    transform: translate(-100%, 100%);
+}
+
+.overlay-bottom-right {
+    left: 50%;
+    top: 50%;
+    border-width: 3px 0 0 3px;
+}
+
+.overlay-bottom-right.off {
+    transform: translate(100%, 100%);
+}
+
+.overlay-header {
+    top: -2px;
+    left: 50%;
+    right: unset;
+    bottom: unset;
+    font-size: 2.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transform: translate(-50%, 0);
+    padding: 1.5rem 1rem;
+    background-color: #ffffffcc;
+    background-image: none;
+    border-radius: 0 0 1rem 1rem;
+    border-color: cornflowerblue;
+    box-shadow: 0 0 3px 8px #6495edaa;
+}
+
+.overlay-header.off {
+    transform: translate(-50%, calc(-100% - 10px));
+}
+
+.overlay-header p {
+    margin: 0;
+}
+
+.overlay-footer {
+    top: unset;
+    left: 50%;
+    right: unset;
+    white-space: nowrap;
+    bottom: -2px;
+    transform: translate(-50%, 0);
+    padding: 0.75rem 1.25rem;
+    background-color: #ffffffcc;
+    background-image: none;
+    border-radius: 1rem 1rem 0 0;
+    border-color: cornflowerblue;
+    box-shadow: 0 0 3px 8px #6495edaa;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 0.25rem;
+}
+
+.overlay-footer.off {
+    transition: transform 1s ease-in;
+    transform: translate(-50%, calc(100% + 10px));
+}
+
+.overlay-footer p {
+    margin: 0;
+    font-size: 110%;
+}
+
+.overlay-footer a {
+    margin: 0 0.5rem;
+}
+
+.overlay-footer div {
+    margin-left: 1rem;
+}
+
+.overlay-footer div a {
+    margin: 0;
+}
+
+.first-letter {
+    font-size: 120%;
+    color: cornflowerblue;
+}
+
+.my-name {
+    text-align: right;
+    font-size: 1.5rem;
+}
+
+.btn-overlay {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%) scale(1, 1);
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    padding: 1rem 2rem;
+    box-shadow: 0 0 20px 10px #4c1daa;
+    background-color: #4c1daa70;
+    transition: all 0.3s;
+}
+
+.btn-overlay:focus {
+    outline: none;
+}
+
+.btn-overlay:hover {
+    box-shadow: 0 0 20px 10px white;
+    background-color: #4c1daaaa;
+    color: white;    
+    transform: translate(-50%,-50%) scale(1.1, 1.1);
 }
 
 .world {
@@ -60,17 +215,23 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-right: 0.5rem;
+}
+
+.dropdown-menu {
+    border: 1px solid #4c1daa;
+    padding: 0.25rem 0.75rem;
 }
 
 .toolbar .btn {
     border-radius: 0;
     border: 1px dashed #4c1daa;
-    margin: 0 0.5rem;
+    margin: 0 0.25rem;
 }
 
 .toolbar .btn:not(:disabled):hover {    
     border: 2px solid #4c1daa;
-    margin: -1px calc(0.5rem - 1px);
+    margin: -1px calc(0.25rem - 1px);
 }
 
 .toolbar .btn:focus {
@@ -79,6 +240,7 @@ body {
 }
 
 .toolbar .btn.on {
+    border-style: solid;
     box-shadow: 0px 0px 6px 3px #4c1daa;
 }
 
@@ -95,7 +257,15 @@ body {
     background: #4c1daa;
     width: 3px;
     align-self: stretch;
-    margin: 0.5rem 0;
+    margin: 0.25rem 0;
+}
+
+.speed-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+    align-content: space-between;
+    align-items: center; 
 }
 
 .learned-iterations {

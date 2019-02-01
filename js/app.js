@@ -14,7 +14,7 @@ const carFriction = 0.05;
 //We want the car to move smoothly, but to process car state less frequently
 let tickFrequency = 50;
 const velocityIncrement = 0.002;
-const angleIncrement = 0.02;
+const angleIncrement = 0.025;
 const fovDistance = 200;
 //FoV angle in radians. Centered around cars front
 const frontAngle = Math.PI / 4;
@@ -27,6 +27,7 @@ let isRecording = false;
 let isMoving = false;
 let showSensors = false;
 let showSpotlight = false;
+let showOverlay = true;
 
 let Engine = Matter.Engine,
     Common = Matter.Common,
@@ -340,24 +341,33 @@ function toggleRecording(on) {
     $('.recording-container *').prop('disabled', !enableRecordingContainer);
 }
 
+function toggleOverlay() {    
+    showOverlay = !showOverlay;
+    $('.overlay').toggleClass('off', !showOverlay);
+    $('.btn-overlay').fadeToggle(1000);
+    if (showOverlay) {
+        $('.btn-overlay').text('Get me back!');
+    }
+}
+
 $('#reset').click(() => {
     Body.setPosition(carBody,  { x: width * (0.1 + 0.8 * Math.random()), y: height * (0.1 + 0.8 * Math.random()) });
     Body.setAngle(carBody, Math.random() * Math.PI);
 });
 
 $('#explosion').click(() => {
-    var forceMagnitude = obstacleMass / 90;
+    var forceMagnitude = obstacleMass / 50;
     for (let obstacle of obstacles) {
         Body.applyForce(obstacle, obstacle.position, {
             x: (forceMagnitude + Common.random() * forceMagnitude) * Common.choose([1, -1]), 
-            y: -forceMagnitude + Common.random() * -forceMagnitude
+            y: -forceMagnitude + Common.random() * -forceMagnitude * Common.choose([1, -1])
         });        
     }
 });
 
 let mouseDownPosition;
 
-$(document).on('mousedown', e => {
+worldEl.on('mousedown', e => {
     if (e.altKey || e.ctrlKey || e.shiftKey) {
         return;
     }
@@ -367,11 +377,11 @@ $(document).on('mousedown', e => {
 });
 
 $('.toolbar').on('mouseup', e => {
-    e.stopPropagation();
+    //e.stopPropagation();
     mouseDownPosition = null;
 });
 
-$(document).click(e => {
+worldEl.click(e => {
     if (e.altKey || e.ctrlKey || e.shiftKey) {
         return;
     }
@@ -413,7 +423,7 @@ $(document).click(e => {
     mouseDownPosition = null;
 });
 
-$(document).on('contextmenu', e => {
+worldEl.on('contextmenu', e => {
     if (e.altKey || e.ctrlKey || e.shiftKey) {
         return;
     }
@@ -430,27 +440,27 @@ $(document).on('contextmenu', e => {
 });
 
 $('#sensors').click(e => {
-    e.stopPropagation();
+    //e.stopPropagation();
     toggleSensors();
 });
 
 $('#spotlight').click(e=> {
-    e.stopPropagation();
+    //e.stopPropagation();
     toggleSpotlight();
 });
 
 $('#move').click(e => {
-    e.stopPropagation();
+    //e.stopPropagation();
     toggleAutoMove();
 });
 
 $('#recording').click(e => {
-    e.stopPropagation();
+    //e.stopPropagation();
     toggleAutoMove(false);
     toggleRecording();
     if (isRecording) {
         toggleSensors(true);
-        if (!learningData.length && currentModel) {
+        if (currentModel) {
             currentModel.dispose();
             currentModel = null;
         }
@@ -458,40 +468,39 @@ $('#recording').click(e => {
 });
 
 $('#applyModel').click(async e => {
-    e.stopPropagation();
+    //e.stopPropagation();
     if (!learningData.length) {
         return;
     }
-    const epochs = 30;
+    const epochs = 40;
     let modal = $('#progressModal');
     modal.modal('show');
     let xs = null;
     let ys = null;
     try {
-        let model = currentModel;
-        if (!model) {
-            model = tf.sequential();
-            model.add(tf.layers.dense({
-                units: Math.max(100, totalSensors * 2),
-                inputShape: [totalSensors],
-                activation: 'relu'
-                }));
-            model.add(tf.layers.dense({
-                units: moveActions.length * turnActions.length,
-                activation: 'softmax'
+        let model = tf.sequential();
+        model.add(tf.layers.dense({
+            units: Math.max(100, totalSensors * 2),
+            inputShape: [totalSensors],
+            activation: 'relu'
             }));
-            model.compile({
-                loss: 'categoricalCrossentropy',
-                optimizer: 'sgd'
-            });
-        }
+        model.add(tf.layers.dense({
+            units: moveActions.length * turnActions.length,
+            activation: 'softmax'
+        }));
+        model.compile({
+            loss: 'categoricalCrossentropy',
+            optimizer: 'sgd'
+        });
         const xs = tf.tensor2d(learningData, [learningData.length, totalSensors]);
         const ys = tf.tidy(() => tf.oneHot(tf.tensor1d(learningLabels, 'int32'), moveActions.length * turnActions.length));
         await model.fit(xs, ys, {
             epochs: epochs,
             yieldEvery : 'epoch'
         });
-        currentModel.dispose();
+        if (currentModel) {
+            currentModel.dispose();
+        }
         currentModel = model;
     } finally {
         if (xs) {
@@ -504,26 +513,29 @@ $('#applyModel').click(async e => {
     }
 });
 
-$('#discardModel').click(e => {
-    e.stopPropagation();
+$('#discardModel').click(() => {
     if (currentModel) {
         currentModel.dispose();
+        currentModel = null;
     }
     learningData.length = 0;
     learningHash.clear();
     learningLabels.length = 0;
     toggleAutoMove();
-    $('#learnedIterations').text(`nothing`);
+    $('#learnedIterations').text(`Nothing`);
 });
 
-$('#toggleToolbarButton').on('mousedown', e => e.stopPropagation());
-
-$('#toggleToolbarButton').click(e => {
-    e.stopPropagation();
+$('#toggleToolbarButton').click(() => {
     $('.toolbar').toggle();
 });
 
+$('#help').click(toggleOverlay);
+
 $('.recording-container *').prop('disabled', true);
+
+$('.dropdown-menu').on('click', e => e.stopPropagation());
+
+$('.btn-overlay').click(toggleOverlay);
 
 tf.loadModel('./agent/trained-agent.json')
     .then(m => { 
