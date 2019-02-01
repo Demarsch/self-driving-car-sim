@@ -154,8 +154,10 @@ body {
     text-transform: uppercase;
     padding: 1rem 2rem;
     box-shadow: 0 0 20px 10px #4c1daa;
+    background-image: url(/img/carbon.jpg);
     background-color: #4c1daa70;
     transition: all 0.3s;
+    text-shadow: 3px 3px darkslateblue;
 }
 
 .btn-overlay:focus {
