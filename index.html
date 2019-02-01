@@ -23,8 +23,13 @@
         <button id="spotlight" class="btn" title="Toggle spotlight mode"><img src="img/spotlight.png"></button>
         <button id="move" class="btn" title="Run auto-movement"><img src="img/move.png"></button>
         <button id="record" class="btn" title="Start/pause/resume recording of user actions"><img src="img/recording.png"></button>
-        <button id="finish" class="btn" title="Train car based on current recording"><img src="img/apply.png"></button>
-        <p id="learnedIterations">0</p>
+        <div class="recording-container">
+            <button id="applyModel" class="btn" title="Train car based on current recording"><img src="img/apply.png"></button>
+            <button id="discardModel" class="btn" title="Forget everything and start from scratch"><img src="img/remove.png"></button>
+            <div class="learned-iterations">
+                <span>Remembered </span><span id="learnedIterations">nothing</span><span> so far</span>
+            </div>  
+        </div>      
     </nav>
 
     <div id="progressModal" class="modal" tabindex="-1" role="dialog">
@@ -32,7 +37,7 @@
           <div class="modal-content">
             <div class="modal-body">
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0;"></div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated w-100" role="progressbar"></div>
                 </div>
             </div>
           </div>

@@ -6,6 +6,7 @@ const mainColor = '#4c1daa';
 
 //Car parameters
 const carWidth = 25;
+const obstacleSize = carWidth;
 const carHeight = 50;
 const carRestitution = 0.3;
 const carFriction = 0.05;
@@ -13,7 +14,7 @@ const carFriction = 0.05;
 let tickFrequency = 50;
 const velocityIncrement = 0.002;
 const angleIncrement = 0.02;
-const fovDistance = 150;
+const fovDistance = 200;
 //FoV angle in radians. Centered around cars front
 const frontAngle = Math.PI / 4;
 const rearAngle = Math.PI / 4;
@@ -27,6 +28,7 @@ let showSensors = false;
 let showSpotlight = false;
 
 let Engine = Matter.Engine,
+    Common = Matter.Common,
     Render = Matter.Render,
     World = Matter.World,
     Bodies = Matter.Bodies,
@@ -58,6 +60,7 @@ let render = Render.create({
 // Run the renderer
 Render.run(render);
 
+let obstacles = [];
 let allObstacles = [];
 //Add world boundaries
 let boundsOffset = 1;
@@ -93,16 +96,6 @@ let bounds = [
 ];
 World.add(engine.world, bounds);
 allObstacles.splice(0, 0, ...bounds);
-
-// Add some obstacles
-// let obstacles = [
-//     Bodies.circle(200, 200, 40, { isStatic: true }),
-//     Bodies.circle(width - 200, 200, 40, { isStatic: true }),
-//     Bodies.circle(width - 200, height - 200, 40, { isStatic: true }),
-//     Bodies.circle(200, height - 200, 40, { isStatic: true })
-// ];
-// World.add(engine.world, obstacles);
-// allObstacles.splice(-1, 0, ...obstacles);
 
 // Create our car
 let carBody = Bodies.rectangle(width / 2 - 100 + Math.random() * 200, height / 2 - 100 + Math.random() * 200, carHeight, carWidth, {
@@ -257,7 +250,7 @@ function keyboardHandler() {
     if (action !== 0 && isRecording) {
         let sensorData = car.sensorData.map(s => s.distanceRel);
         if (recordLearningData(sensorData, action)) {
-            $('#learnedIterations').text(learningData.length.toString());
+            $('#learnedIterations').text(`${learningData.length} position${learningData.length === 1 ? '' : 's'}`);
         }
     }
     return result;
@@ -289,6 +282,21 @@ Events.on(render, 'afterRender', function() {
             }
         }
     }
+    if (mouseDownPosition) {
+        context.strokeStyle = mainColor;
+        context.setLineDash([6]);
+        context.beginPath();
+        context.moveTo(mouseDownPosition.x, mouseDownPosition.y);
+        context.lineTo(mouse.position.x, mouse.position.y);
+        context.stroke();
+        
+    } else if (mouse.position.x > 0 && mouse.position.y > 0) {
+        context.strokeStyle = mainColor;
+        context.setLineDash([6]);
+        context.beginPath();
+        context.arc(mouse.position.x, mouse.position.y, obstacleSize, 0, 2 * Math.PI);
+        context.stroke();
+    }
     Render.endViewTransform(render);
 }); 
 
@@ -316,31 +324,125 @@ function toggleAutoMove(on) {
     btn.toggleClass('on', isMoving);
 }
 
+function toggleRecording(on) {
+    let btn = $('#record');   
+    isRecording = typeof on === 'undefined' ? !isRecording : on;
+    btn.toggleClass('on', isRecording);
+    let showRecordingContainer = isRecording || learningData.length;
+    let container = $('.recording-container');
+    if (showRecordingContainer) {
+        container.show();
+    } else {
+        container.hide();
+    }
+}
+
 $('#reset').click(() => {
     Body.setPosition(carBody,  { x: width * (0.1 + 0.8 * Math.random()), y: height * (0.1 + 0.8 * Math.random()) });
     Body.setAngle(carBody, Math.random() * Math.PI);
 });
 
-$('#sensors').click(() => toggleSensors());
+let mouseDownPosition;
 
-$('#spotlight').click(() => toggleSpotlight());
+$(document).on('mousedown', e => {
+    if (e.altKey || e.ctrlKey || e.shiftKey) {
+        return;
+    }
+    if (e.button === 0) {
+        mouseDownPosition = Vector.clone(mouse.position);
+    }
+});
 
-$('#move').click(() => toggleAutoMove());
+$('.toolbar').on('mouseup', e => {
+    e.stopPropagation();
+    mouseDownPosition = null;
+});
 
-$('#record').click(() => {
+$(document).click(e => {
+    if (e.altKey || e.ctrlKey || e.shiftKey) {
+        return;
+    }
+    if (!mouseDownPosition) {
+        return;
+    }
+    if (e.button === 0) { 
+        let mouseUpPosition = mouse.position;
+        if (mouseUpPosition.x === mouseDownPosition.x && mouseUpPosition.y === mouseDownPosition.y) {
+            obstacle = Bodies.circle(mouseUpPosition.x, mouseUpPosition.y, obstacleSize, {
+                isStatic: true,
+                render: {
+                    fillStyle: mainColor
+                }
+            });
+        } else {
+            let length = Math.sqrt((mouseUpPosition.x - mouseDownPosition.x) ** 2 + (mouseUpPosition.y - mouseDownPosition.y) ** 2);
+            let angle = Math.asin((mouseUpPosition.y - mouseDownPosition.y) / length) * (Math.sign(mouseUpPosition.x - mouseDownPosition.x) || 1);
+            let center = {
+                x: mouseDownPosition.x + (mouseUpPosition.x - mouseDownPosition.x) / 2,
+                y: mouseDownPosition.y + (mouseUpPosition.y - mouseDownPosition.y) / 2
+            }
+            obstacle = Bodies.rectangle(center.x, center.y, length, 10, {
+                isStatic: true,
+                render: {
+                    fillStyle: mainColor
+                }
+            });
+            Body.setAngle(obstacle, angle);
+        }
+        World.add(engine.world, obstacle);
+        obstacles.push(obstacle);
+        allObstacles.push(obstacle);
+    }
+    mouseDownPosition = null;
+});
+
+$(document).on('contextmenu', e => {
+    if (e.altKey || e.ctrlKey || e.shiftKey) {
+        return;
+    }
+    e.stopPropagation();
+    let mousePosition = mouse.position;
+    let clickedObstacles = Query.point(obstacles, mousePosition);
+    if (clickedObstacles.length) {
+        for (let obstacle of clickedObstacles) {
+            World.remove(engine.world, obstacle);
+            obstacles.splice(obstacles.indexOf(obstacle), 1);
+            allObstacles.splice(allObstacles.indexOf(obstacle), 1);
+        }        
+    }
+});
+
+$('#sensors').click(e => {
+    e.stopPropagation();
+    toggleSensors();
+});
+
+$('#spotlight').click(e=> {
+    e.stopPropagation();
+    toggleSpotlight();
+});
+
+$('#move').click(e => {
+    e.stopPropagation();
+    toggleAutoMove();
+});
+
+$('#record').click(e => {
+    e.stopPropagation();
     toggleAutoMove(false);
-    isRecording = !isRecording;
+    toggleRecording();
     if (isRecording) {
-        toggleSpotlight(true);
         toggleSensors(true);
     }
 });
 
-$('#finish').click(async () => {
+$('#applyModel').click(async e => {
+    e.stopPropagation();
     const epochs = 30;
     let modal = $('#progressModal');
     modal.modal('show');
-    let progress = modal.find('.progress-bar');
+    let xs = null;
+    let ys = null;
     try {
         let model = currentModel;
         if (!model) {
@@ -359,22 +461,44 @@ $('#finish').click(async () => {
                 optimizer: 'sgd'
             });
         }
-
         const xs = tf.tensor2d(learningData, [learningData.length, totalSensors]);
-        const ys = tf.tidy(() => tf.oneHot(tf.tensor1d(learningLabels, 'int32'), moveActions.length * turnActions.length));        
+        const ys = tf.tidy(() => tf.oneHot(tf.tensor1d(learningLabels, 'int32'), moveActions.length * turnActions.length));
         await model.fit(xs, ys, {
             epochs: epochs,
-            callbacks : {
-                onEpochEnd: e => {
-                    progress.css('width', `100%`);
-                }
-            },
             yieldEvery : 'epoch'
         });
-        //TODO: dispose current model
         currentModel = model;
     } finally {
+        if (xs) {
+            xs.dispose();
+        }
+        if (ys) {
+            ys.dispose();
+        }
         modal.modal('hide');
-        progress.css('width', '0px');
     }
 });
+
+$('#discardModel').click(e => {
+    e.stopPropagation();
+    if (currentModel) {
+        currentModel.dispose();
+    }
+    learningData.length = 0;
+    learningHash.clear();
+    learningLabels.length = 0;
+    toggleAutoMove();
+    $('#learnedIterations').text(`nothing`);
+});
+
+$('.recording-container').hide();
+
+tf.loadModel('./agent/trained-agent.json')
+    .then(m => { 
+        currentModel = m;
+        console.log('Loaded model');
+    })
+    .catch(e => {
+        console.log('Failed to load model');
+        console.log(e);
+    });

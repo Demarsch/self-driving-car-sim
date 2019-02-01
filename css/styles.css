@@ -24,28 +24,35 @@ body {
 
 .toolbar {
     position: fixed;
-    left: 50%;
+    left: 40%;
     top: -1px;
     background: white;
-    transform: translate(-50%,0);
     padding: 0.5rem;
     border: 1px solid #4c1daa;
-    opacity: 0.2;
+    /* opacity: 0.2; */
+    transition: opacity 0.4s;
+    color: #4c1daa;
 }
 
-.toolbar:hover {
-    opacity: 1;
+.recording-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
+
+/* .toolbar:hover {
+    opacity: 1;
+} */
 
 .toolbar .btn {
     border-radius: 0;
     border: 1px dashed #4c1daa;
-    margin: 0 1rem;
+    margin: 0 0.75rem;
 }
 
 .toolbar .btn:hover {    
     border: 2px solid #4c1daa;
-    margin: -1px calc(1rem - 1px);
+    margin: -1px calc(0.75rem - 1px);
 }
 
 .toolbar .btn:focus {
@@ -55,4 +62,13 @@ body {
 
 .toolbar .btn.on {
     box-shadow: 0px 0px 6px 3px #4c1daa;
+}
+
+.learned-iterations {
+    font-size: 1.2rem;
+    margin: auto 0;
+}
+
+#learnedIterations {
+    font-weight: 600;
 }
