@@ -181,6 +181,8 @@ body {
     display: block;
     left: 50%;
     top: 50%;
+    right: unset;
+    bottom: unset;
     transform: translate(-50%,-50%) scale(1, 1);
     font-size: 3rem;
     font-weight: 700;
@@ -192,6 +194,11 @@ body {
     background-color: #4c1daa70;
     transition: all 0.3s;
     text-shadow: 3px 3px darkslateblue;
+}
+
+.btn-overlay.off {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .btn-overlay:focus {

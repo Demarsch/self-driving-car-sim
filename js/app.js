@@ -344,7 +344,6 @@ function toggleRecording(on) {
 function toggleOverlay() {    
     showOverlay = !showOverlay;
     $('.overlay').toggleClass('off', !showOverlay);
-    $('.btn-overlay').fadeToggle(600);
     if (showOverlay) {
         $('.btn-overlay').text('Get me back!');
     }
