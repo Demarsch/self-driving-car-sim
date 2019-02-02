@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Car Playground</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -32,7 +33,7 @@
             <button id="applyModel" class="btn" title="Train car based on current recording"><img src="img/apply.png"></button>
             <button id="discardModel" class="btn" title="Forget everything and start from scratch"><img src="img/remove.png"></button>
             <div class="learned-iterations">
-                <span id="learnedIterations">Nothing</span><span> learned so far</span>
+                <span id="learnedIterations">No positions has</span> been learned so far
             </div>  
         </div>      
         <div class="separator"></div>
@@ -40,10 +41,18 @@
     </nav>
     <button id="toggleToolbarButton"></button>
 
-    <div class="overlay overlay-top-left"></div>
-    <div class="overlay overlay-top-right"></div>
-    <div class="overlay overlay-bottom-right"></div>
-    <div class="overlay overlay-bottom-left"></div>
+    <div class="overlay overlay-top-left">
+        <h2>1. <span class="first-letter">B</span>uild a world full of obstacles</h2>
+    </div>
+    <div class="overlay overlay-top-right">
+        <h2>2. <span class="first-letter">S</span>tart recording your car actions</h2>
+    </div>
+    <div class="overlay overlay-bottom-right">
+        <h2>3. <span class="first-letter">L</span>et the car learn these actions</h2>
+    </div>
+    <div class="overlay overlay-bottom-left">
+        <h2>4. <span class="first-letter">T</span>urn the autopilot on and watch it</h2>
+    </div>
 
     <div class="overlay overlay-header">
         <p><span class="first-letter">M</span>ini <span class="first-letter">L</span>essons <span class="first-letter">T</span>end to <span class="first-letter">F</span>ortify <span class="first-letter">J</span>aded <span class="first-letter">S</span>tudents</p>
@@ -57,6 +66,13 @@
         <div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
         <a target="_blank" href="https://www.brusheezy.com/">Photoshop brushes by Brusheezy!</a>
     </footer>
+
+    <img class="overlay overlay-arrow overlay-arrow-right" src="img/arrow.svg">
+    <img class="overlay overlay-arrow overlay-arrow-bottom" src="img/arrow.svg">
+    <img class="overlay overlay-arrow overlay-arrow-left" src="img/arrow.svg">
+    <img class="overlay overlay-arrow overlay-arrow-top" src="img/arrow.svg">
+
+    <div class="overlay overlay-mid"></div>
 
     <button class="btn btn-overlay">Get me behind the wheel!</button>
 

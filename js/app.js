@@ -259,7 +259,7 @@ function keyboardHandler() {
     if (action !== 0 && isRecording) {
         let sensorData = car.sensorData.map(s => s.distanceRel);
         if (recordLearningData(sensorData, action)) {
-            $('#learnedIterations').text(`${learningData.length} position${learningData.length === 1 ? '' : 's'}`);
+            $('#learnedIterations').text(`${learningData.length} position${learningData.length === 1 ? '' : 's'} ${learningData.length === 1 ? 'has' : 'have'}`);
         }
     }
     return result;
@@ -344,7 +344,7 @@ function toggleRecording(on) {
 function toggleOverlay() {    
     showOverlay = !showOverlay;
     $('.overlay').toggleClass('off', !showOverlay);
-    $('.btn-overlay').fadeToggle(1000);
+    $('.btn-overlay').fadeToggle(600);
     if (showOverlay) {
         $('.btn-overlay').text('Get me back!');
     }
@@ -376,8 +376,7 @@ worldEl.on('mousedown', e => {
     }
 });
 
-$('.toolbar').on('mouseup', e => {
-    //e.stopPropagation();
+$('.toolbar').on('mouseup', () => {
     mouseDownPosition = null;
 });
 
@@ -440,25 +439,21 @@ worldEl.on('contextmenu', e => {
 });
 
 $('#sensors').click(e => {
-    //e.stopPropagation();
     toggleSensors();
 });
 
-$('#spotlight').click(e=> {
-    //e.stopPropagation();
+$('#spotlight').click(() => {
     toggleSpotlight();
 });
 
-$('#move').click(e => {
-    //e.stopPropagation();
+$('#move').click(() => {
     toggleAutoMove();
 });
 
 $('#recording').click(e => {
-    //e.stopPropagation();
-    toggleAutoMove(false);
     toggleRecording();
     if (isRecording) {
+        toggleAutoMove(false);
         toggleSensors(true);
         if (currentModel) {
             currentModel.dispose();
@@ -467,8 +462,7 @@ $('#recording').click(e => {
     }
 });
 
-$('#applyModel').click(async e => {
-    //e.stopPropagation();
+$('#applyModel').click(async () => {
     if (!learningData.length) {
         return;
     }
@@ -521,8 +515,8 @@ $('#discardModel').click(() => {
     learningData.length = 0;
     learningHash.clear();
     learningLabels.length = 0;
-    toggleAutoMove();
-    $('#learnedIterations').text(`Nothing`);
+    toggleAutoMove(false);
+    $('#learnedIterations').text('No positions have');
 });
 
 $('#toggleToolbarButton').click(() => {

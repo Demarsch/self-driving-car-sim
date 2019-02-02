@@ -24,7 +24,10 @@ body {
     left: 0;
     border-color: #4c1daaaa;
     border-style: solid;
-    transition: transform 1s ease-in;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transition: transform 0.6s ease-in;
 }
 
 .overlay-top-left {
@@ -67,6 +70,23 @@ body {
     transform: translate(100%, 100%);
 }
 
+.overlay-mid {
+    left: 50%;
+    top: 50%;
+    right: unset;
+    bottom: unset;
+    width: 30vmin;
+    height: 30vmin;
+    transform: translate(-50%, -50%) rotate(45deg);
+    pointer-events: none;
+    transition: opacity 1s, transform 1s;
+}
+
+.overlay-mid.off {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(90deg)
+}
+
 .overlay-header {
     top: -2px;
     left: 50%;
@@ -92,6 +112,18 @@ body {
     margin: 0;
 }
 
+.overlay h2 {
+    margin: auto;
+    font-size: 2.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 1.5rem 1rem;
+    background-color: #ffffffcc;
+    border-radius: 1rem;
+    border-color: cornflowerblue;
+    box-shadow: 0 0 3px 8px #6495edaa;
+}
+
 .overlay-footer {
     top: unset;
     left: 50%;
@@ -109,8 +141,8 @@ body {
     flex-direction: row;
     align-items: center;
     padding-bottom: 0.25rem;
-}
-
+} 
+ 
 .overlay-footer.off {
     transition: transform 1s ease-in;
     transform: translate(-50%, calc(100% + 10px));
@@ -126,7 +158,7 @@ body {
 }
 
 .overlay-footer div {
-    margin-left: 1rem;
+    margin-left: 0.5rem;
 }
 
 .overlay-footer div a {
@@ -139,12 +171,14 @@ body {
 }
 
 .my-name {
+    margin: 0;
     text-align: right;
     font-size: 1.5rem;
 }
 
 .btn-overlay {
     position: fixed;
+    display: block;
     left: 50%;
     top: 50%;
     transform: translate(-50%,-50%) scale(1, 1);
@@ -169,6 +203,57 @@ body {
     background-color: #4c1daaaa;
     color: white;    
     transform: translate(-50%,-50%) scale(1.1, 1.1);
+}
+
+.overlay-arrow {
+    width: 120px;
+    height: 120px;
+    position: fixed;
+    transition: all 0.3s;
+    right: unset;
+    bottom: unset;
+    background: none;
+    border: none;
+}
+
+.overlay-arrow-right {
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.overlay-arrow-right.off {
+    left: 125%;
+}
+
+.overlay-arrow-bottom {
+    top: 50%;
+    left: 75%;
+    transform: translate(-50%,-50%) rotate(90deg);
+}
+
+.overlay-arrow-bottom.off {
+    top: 125%;
+}
+
+.overlay-arrow-left {
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%,-50%) rotate(180deg);
+}
+
+.overlay-arrow-left.off {
+    left: -25%;
+}
+
+.overlay-arrow-top {
+    top: 50%;
+    left: 25%;
+    transform: translate(-50%,-50%) rotate(-90deg);
+}
+
+.overlay-arrow-top.off {
+    top: -25%;
 }
 
 .world {
@@ -262,20 +347,8 @@ body {
     margin: 0.25rem 0;
 }
 
-.speed-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: stretch;
-    align-content: space-between;
-    align-items: center; 
-}
-
 .learned-iterations {
     white-space: nowrap;
     font-size: 1.2rem;
     margin: auto 0;
-}
-
-#learnedIterations {
-    font-weight: 600;
 }
