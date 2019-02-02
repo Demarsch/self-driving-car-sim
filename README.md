@@ -16,7 +16,7 @@ However there are situations when the ideal/appropriate course of actions requir
 
 My project utilizes this concept in some way but by no means my implementation should be considered following any published academic researched. 
 
-It consists of two main parts: an environment that emulates some of the real world concepts e.g. mass, force, intertia and contains physical bodies (obstacles) and friction and an agent (car) that can observe and record human player actions and then try to learn this behavior and apply it to the unknown situations.
+It consists of two main parts: an environment that emulates some of the real world concepts e.g. mass, force, intertia, friction and contains physical bodies (obstacles) and an agent (car) that can observe and record human player actions and then try to learn this behavior and apply it to the unknown situations.
 
 The car's brain is represented by a simple neural network (NN) with fixed number of inputs (obstacle position data comes from front and rear sensors), a hidden layer with triple the number of inputs or 100 (whichever is greater) and 9 outputs that represent the possible set of two actions taken at any given moment: one of the move actions (No action, move forward/speed up, move backward/slow down) and one of the turn actions (No action, turn right, turn left).
 
@@ -24,7 +24,7 @@ The human player starts recording and manully controls the car with the arrow ke
 
 ## Technology Stack
 
-The whole application is built using client-side only technologies (HTML, CSS, JavaScript) thus can be easily launched locally.
+The whole application is built using client-side only technologies (HTML, CSS, JavaScript) thus requires no special deployment.
 
 The environment is built using [matter.js](http://brm.io/matter-js/) physics engine and utilizes [Technostalgic](https://github.com/Technostalgic) implementation of [raycasting algorithm](https://github.com/Technostalgic/MatterJS_Raycast).
 
