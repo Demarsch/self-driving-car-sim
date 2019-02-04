@@ -1,4 +1,4 @@
-* {
+/* * {
     font-family: 'Roboto', sans-serif;
     color: #4c1daa;
 }
@@ -72,9 +72,9 @@ body {
     border-color: #4c1daaaa;
     border-style: solid;
     transform: translate(-100%, 100%);
-}
+} */
 
-.overlay-bottom-right {
+/* .overlay-bottom-right {
     background-image: none;
     left: 50%;
     top: 50%;
@@ -86,9 +86,9 @@ body {
     border-color: #4c1daaaa;
     border-style: solid;
     transform: translate(100%, 100%);
-}
+} */
 
-.overlay-header {
+/* .overlay-header {
     top: -2px;
     left: 50%;
     right: unset;
@@ -111,9 +111,9 @@ body {
 
 .overlay-header p {
     margin: 0;
-}
+} */
 
-.overlay h2 {
+/* .overlay h2 {
     margin: auto;
     font-size: 2.2rem;
     font-weight: 600;
@@ -123,9 +123,9 @@ body {
     border-radius: 1rem;
     border-color: cornflowerblue;
     box-shadow: 0 0 3px 8px #6495edaa;
-}
+} */
 
-.overlay-footer {
+/* .overlay-footer {
     top: unset;
     left: 50%;
     right: unset;
@@ -164,9 +164,9 @@ body {
 
 .overlay-footer div a {
     margin: 0;
-}
+} */
 
-.first-letter {
+/* .first-letter {
     font-size: 120%;
     color: cornflowerblue;
 }
@@ -211,9 +211,9 @@ body {
     background-color: #4c1daaaa;
     color: white;    
     transform: translate(-50%,-50%) scale(1.1, 1.1);
-}
+} */
 
-.overlay-arrow {
+/* .overlay-arrow {
     width: 120px;
     height: 120px;
     position: fixed;
@@ -262,8 +262,8 @@ body {
 
 .overlay-arrow-top.off {
     top: -25%;
-}
-
+} */
+/* 
 .world {
     width: 100%;
     height: 100%;
@@ -282,7 +282,7 @@ body {
     transform: translate(-50%, 0);
     color: #4c1daa;
     flex-wrap: nowrap;
-}
+} */
 
 #toggleToolbarButton {
     position: fixed;

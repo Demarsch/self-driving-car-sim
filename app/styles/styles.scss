@@ -1,0 +1,357 @@
+$dark-color: #4c1daa;
+$light-color: white;
+$header-color: cornflowerblue;
+$overlay-hide-duration: 0.6s;
+
+@mixin no-box-shadow() {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+@mixin box-shadow($radius, $blur, $color) {
+    -webkit-box-shadow: 0 0 $radius $blur $color;
+    -moz-box-shadow: 0 0 $radius $blur $color;
+    box-shadow: 0 0 $radius $blur $color;
+}
+
+@mixin heading {
+    white-space: nowrap;
+    padding: 1.5rem 1rem;
+    background-color: transparentize($light-color, 0.2);
+    border-color: $header-color;
+    @include box-shadow(3px, 6px, transparentize($header-color, 0.2));
+}
+
+@mixin no-spacing {
+    margin: 0;
+    padding: 0;
+}
+
+@mixin flex-row-center {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+@mixin background-carbon() {
+    background-image: url(/../img/carbon.jpg);
+}
+
+@mixin overlay($top: unset, $right: unset, $bottom: unset, $left :unset) {
+    position: fixed;
+    top: $top;
+    right: $right;
+    bottom: $bottom;
+    left: $left;
+    transition: transform 0.6s ease-in;
+    @include flex-row-center;
+}
+
+@mixin show-border($color: $dark-color) {    
+    border-color: $color;
+    border-style: solid;
+}
+
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
+body,
+html {
+    @include no-spacing;
+    height: 100%;
+}
+
+body {
+    @include flex-row-center;
+    background-color: $light-color;
+}
+
+p {
+    @include no-spacing;
+}
+
+.overlay {
+    h2 {
+        @include heading;
+        @include box-shadow(3px, 6px, transparentize($header-color, 0.2));
+        margin: auto;
+        font-size: 2.2rem;
+        font-weight: 600;
+        border-radius: 1rem;
+    }
+
+    &-full {
+        @include background-carbon;
+    
+        &.off {
+            display: none;
+        }
+    }
+
+    &-top-left {
+        
+        @include overlay(0, 50%, 50%, 0);
+        border-width: 0 3px 3px 0;
+    
+        &.off {
+            @include show-border;
+            transform: translate(-100%, -100%);
+        }
+    }
+
+    &-top-right {
+        @include overlay(0, 0, 50%, 50%);
+        border-width: 0 0 3px 3px;
+
+        &.off {
+            @include show-border;
+            transform: translate(100%, -100%);
+        }
+    }
+
+    &-bottom-left {
+        @include overlay(50%, 50%, 0, 0);
+        border-width: 3px 3px 0 0;
+    
+        &.off {
+            @include show-border;
+            transform: translate(-100%, 100%);
+        }
+    }
+
+    &-bottom-right {
+        @include overlay(50%, 0, 0 ,50%);
+        border-width: 3px 0 0 3px;
+    
+        &.off {
+            @include show-border;
+            transform: translate(100%, 100%); 
+        }
+    }
+
+    &-header {
+        @include overlay($top:-2px, $left: 50%);
+        @include heading();
+        font-size: 2.5rem;
+        font-weight: 600;
+        transform: translate(-50%, 0);
+        border-radius: 0 0 1rem 1rem;
+    
+        &.off {
+            transform: translate(-50%, calc(-100% - 10px));
+        }
+    }
+
+    &-footer {
+        @include overlay(0, 0, -2px, 50%);
+        @include box-shadow(3px, 8px, transparentize($header-color, 0.2));
+        @include flex-row-center();
+        white-space: nowrap;
+        transform: translate(-50%, 0);
+        padding: 0.75rem 1.25rem;
+        background-color: transparentize($light-color, 0.2);
+        border-radius: 1rem 1rem 0 0;
+        border-color: $header-color;
+        padding-bottom: 0.25rem;
+    
+        &.off {
+            transform: translate(-50%, calc(100% + 10px));
+        }
+    
+        p {
+            font-size: 110%;
+        }
+    
+        a {
+            margin: 0 0.5rem;
+        }
+    
+        div {
+            margin-left: 0.5rem;
+    
+            a {
+                margin: 0;
+            }
+        }
+    }    
+
+    &.btn-overlay {
+        @include overlay($top:50%, $left:50%);
+        @include box-shadow(20px, 10px, $dark-color);
+        @include background-carbon();
+        transform: translate(-50%,-50%) scale(1, 1);
+        font-size: 3rem;
+        font-weight: 700;
+        color: $light-color;
+        text-transform: uppercase;
+        padding: 1rem 2rem;
+        background-color: transparentize($dark-color, 0.2);
+        transition: all 0.3s;
+        text-shadow: 3px 3px $dark-color;
+
+        &.off {
+            opacity: 0;   
+            transform: translate(-50%,-50%) scale(1.1, 1.1);
+            pointer-events: none;
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        &:hover {
+            @include box-shadow(20px, 10px, $light-color);
+            background-color: transparentize($dark-color, 0.2);
+            color: $light-color;    
+            transform: translate(-50%,-50%) scale(1.1, 1.1);
+        }
+    }
+
+    &-arrow {
+        width: 120px;
+        height: 120px;
+        transition: all 0.5s;
+
+        &-right {            
+            @include overlay($top:25%, $left:50%);
+            transform: translate(-50%,-50%);
+
+            &.off {
+                left: 125%;
+            }
+        }
+
+        &-bottom {
+            @include overlay($top:50%, $left:75%);
+            transform: translate(-50%,-50%) rotate(90deg);
+
+            &.off {
+                top: 125%;
+            }
+        }
+
+        &-left {
+            @include overlay($top:75%, $left:50%);
+            transform: translate(-50%,-50%) rotate(180deg);
+
+            &.off {
+                left: -25%;
+            }
+        }
+
+        &-top {
+            @include overlay($top:50%, $left:25%);
+            transform: translate(-50%,-50%) rotate(-90deg);
+
+            &.off {
+                left: -25%;
+            }
+        }
+    }
+}
+
+.first-letter {
+    font-size: 120%;
+    color: $header-color;
+}
+
+.my-name {
+    margin: 0;
+    text-align: right;
+    font-size: 1.5rem;
+}
+
+.world {
+    @include flex-row-center();
+    width: 100%;
+    height: 100%;
+}
+
+.toolbar {
+    position: fixed;
+    left: 50%;
+    top: -1px;
+    background: $light-color;
+    padding: 0.5rem;
+    border: 1px solid $dark-color;
+    transform: translate(-50%, 0);
+    color: $dark-color;
+    flex-wrap: nowrap;
+
+    &.separator {
+        background: $dark-color;
+        width: 3px;
+        align-self: stretch;
+        margin: 0.25rem 0;
+    }
+    
+    .btn {
+        border-radius: 0;
+        border: 1px dashed $dark-color;
+        margin: 0 0.25;
+
+        &:not(:disabled):hover {    
+            border: 2px solid $dark-color;
+            margin: -1px calc(0.25 - 1px);
+        }
+
+        &:focus {
+            @include no-box-shadow();
+            outline: none;
+        }
+        
+        &.on {
+            @include box-shadow(6px, 3px, $dark-color);
+            border-style: solid;
+        }
+    }
+}
+
+#toggleToolbarButton {
+    position: fixed;
+    left: 50%;
+    top: 0;
+    background: $dark-color;
+    transform: translate(-50%,0);
+    width: 48px;
+    height: 14px;
+    cursor: pointer;
+    border-width: 0 1px 1px 1px;
+    border-style: solid;
+    border-color: $dark-color;
+    background-image: url(/../img/up-down.png);
+    background-repeat: no-repeat;
+    background-position: center;
+
+    &:focus {
+        outline: none;
+        box-shadow: none;
+    }
+}
+
+.recording-container {
+    @include flex-row-center();
+    margin-right: 0.5rem;
+}
+
+.dropdown-menu {
+    border: 1px solid $dark-color;
+    padding: 0.25rem 0.75rem;
+}
+
+@keyframes blink {
+    from {opacity: 1;}
+    to {opacity:0;}
+}
+  
+#recording.on img {
+    animation: blink normal 1s infinite linear;
+}
+  
+.learned-iterations {
+    white-space: nowrap;
+    font-size: 1.2rem;
+    margin: auto 0;
+}
