@@ -22,69 +22,70 @@ body {
     right: 0;
     bottom: 0;
     left: 0;
-    border-color: #4c1daaaa;
-    border-style: solid;
     display: flex;
     flex-direction: row;
     align-items: center;
     transition: transform 0.6s ease-in;
 }
 
+.overlay-full.off {
+    display: none;    
+}
+
 .overlay-top-left {
+    background-image: none;
     right: 50%;
     bottom: 50%;
     border-width: 0 3px 3px 0;
 }
 
 .overlay-top-left.off {
+    background-image: url(../img/carbon.jpg);
+    border-color: #4c1daaaa;
+    border-style: solid;
     transform: translate(-100%, -100%);
 }
 
 .overlay-top-right {
+    background-image: none;
     left: 50%;
     bottom: 50%;
     border-width: 0 0 3px 3px;
 }
 
 .overlay-top-right.off {
+    background-image: url(../img/carbon.jpg);
+    border-color: #4c1daaaa;
+    border-style: solid;
     transform: translate(100%, -100%);
 }
 
 .overlay-bottom-left {
+    background-image: none;
     right: 50%;
     top: 50%;    
     border-width: 3px 3px 0 0;
 }
 
 .overlay-bottom-left.off {
+    background-image: url(../img/carbon.jpg);
+    border-color: #4c1daaaa;
+    border-style: solid;
     transform: translate(-100%, 100%);
 }
 
 .overlay-bottom-right {
+    background-image: none;
     left: 50%;
     top: 50%;
     border-width: 3px 0 0 3px;
 }
 
 .overlay-bottom-right.off {
+    background-image: url(../img/carbon.jpg);
+    border-color: #4c1daaaa;
+    border-style: solid;
     transform: translate(100%, 100%);
-}
-
-.overlay-mid {
-    left: 50%;
-    top: 50%;
-    right: unset;
-    bottom: unset;
-    width: 30vmin;
-    height: 30vmin;
-    transform: translate(-50%, -50%) rotate(45deg);
-    pointer-events: none;
-    transition: opacity 1s, transform 1s;
-}
-
-.overlay-mid.off {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(90deg)
 }
 
 .overlay-header {
@@ -216,7 +217,7 @@ body {
     width: 120px;
     height: 120px;
     position: fixed;
-    transition: all 0.3s;
+    transition: all 0.5s;
     right: unset;
     bottom: unset;
     background: none;

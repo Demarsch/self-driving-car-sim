@@ -5,12 +5,6 @@ let Body = Matter.Body,
 
 class Car {
 
-    
-    // frontAngle: frontAngle,
-    // frontSensors: frontSensors,
-    // rearAngle: rearAngle,
-    // rearSensors: rearSensors
-
     constructor(body, options) {
         this.body = body;
         options = options || {};
