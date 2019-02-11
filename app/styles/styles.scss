@@ -83,6 +83,7 @@ p {
     }
 
     &-full {
+        @include overlay(0, 0, 0, 0);
         @include background-carbon;
     
         &.off {
@@ -145,7 +146,7 @@ p {
     }
 
     &-footer {
-        @include overlay(0, 0, -2px, 50%);
+        @include overlay($bottom: -2px, $left: 50%);
         @include box-shadow(3px, 8px, transparentize($header-color, 0.2));
         @include flex-row-center();
         white-space: nowrap;

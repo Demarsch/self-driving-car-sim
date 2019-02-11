@@ -1,16 +1,17 @@
-const degree = Math.PI / 180;
+import * as Matter from "matter-js";
+import raycast from './raycast.js';
 
-let Body = Matter.Body,
-    Vector = Matter.Vector;
+const Body = Matter.Body,
+      Vector = Matter.Vector;
 
-class Car {
+export default class Car {
 
     constructor(body, options) {
         this.body = body;
         options = options || {};
         this._velocityIncrement = options.velocityIncrement || 0.003;
         this._angleIncrement = options.angleIncrement || 0.03;
-        this._fovDistance = options.fovDistance || 150;
+        this.fovDistance = options.fovDistance || 200;
         this._frontSensors = options.frontSensors || 9;
         this._frontAngle = options.frontAngle || Math.PI / 2;
         this._rearSensors = options.rearSensors || 9;
@@ -21,7 +22,7 @@ class Car {
 
         let angle = this._frontAngle;
         let halfAngle = angle / 2;
-        let deltaAngle = angle / this._frontSensors;
+        let deltaAngle = this._frontSensors ? angle / this._frontSensors : 0;
         for (let i = 0; i < this._frontSensors; i++) {
             this.sensorData.push({ point: { x: 0, y: 0 }});
             this._frontAngles.push({
@@ -32,19 +33,21 @@ class Car {
 
         angle = this._rearAngle;
         halfAngle = angle / 2;
-        deltaAngle = angle / this._rearSensors;
+        deltaAngle = this._rearSensors ? angle / this._rearSensors : 0;
         for (let i = 0; i < this._rearSensors; i++) {
             this.sensorData.push({ point: { x: 0, y: 0 }});
             this._rearAngles.push({
                 angle: -halfAngle + i * deltaAngle,
                 index: i
             });
-        }        
+        }     
+        this.moveActions = [() => {}, () => this.moveForward(), () => this.moveBackward()];
+        this.turnActions = [() => {}, () => this.turnRight(), () => this.turnLeft()];   
     }
 
     _onAction() {        
-        this.speedDelta = carBody.speed - (this.speed || 0);
-        this.speed = carBody.speed;
+        this.speedDelta = this.body.speed - (this.speed || 0);
+        this.speed = this.body.speed;
     }
 
     moveForward() {
@@ -70,7 +73,7 @@ class Car {
     }
 
     updateSensorData(obstacles) {
-        let vForward = Vector.create(this._fovDistance * this.body.axes[1].x, this._fovDistance * this.body.axes[1].y);
+        let vForward = Vector.create(this.fovDistance * this.body.axes[1].x, this.fovDistance * this.body.axes[1].y);
         let sensorData = this.sensorData;
         let totalSensors = this._frontSensors + this._rearSensors;
         for (let i = 0; i < totalSensors; i++) {
@@ -83,7 +86,7 @@ class Car {
             if (collisions.length === 0) {
                 sensorItem.collides = false;
                 sensorItem.point = vFov;
-                sensorItem.distance = this._fovDistance;
+                sensorItem.distance = this.fovDistance;
                 sensorItem.distanceRel = 1;
             } else {
                 let collision = collisions[0];
@@ -91,7 +94,7 @@ class Car {
                 sensorItem.collides = true;
                 sensorItem.point = collision.point;
                 sensorItem.distance = distance;
-                sensorItem.distanceRel = distance / this._fovDistance;
+                sensorItem.distanceRel = distance / this.fovDistance;
             }
         }
         for (let i = 0; i < this._rearAngles.length; i++) {

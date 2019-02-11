@@ -11,6 +11,8 @@
 //is no built-in method for raycasting that returns the ray's
 //intersection points
 
+import * as Matter from 'matter-js';
+
 class vec2 {
 
     constructor(x, y) {
@@ -63,7 +65,7 @@ class vec2 {
 //param 'end' - end point of raycast
 //param 'sort' - whether or not the ray collisions should be
 //	sorted based on distance from the origin
-function raycast(bodies, start, end, sort = true){
+export default function raycast(bodies, start, end, sort = true){
 	//convert the start & end parameters to my custom
 	//'vec2' object type
 	start = vec2.fromOther(start);

@@ -5,15 +5,15 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require('path');
 
 module.exports = {
-    entry: './app/scripts/app.ts',
+    entry: './app/scripts/app.js',
     devtool: 'inline-source-map',
     module: {        
         rules: [
-            {
-                test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: /node_modules/
-            }, 
+            // {
+            //     test: /\.tsx?$/,
+            //     use: 'ts-loader',
+            //     exclude: /node_modules/
+            // }, 
             {
                 test: /\.(png|svg|jpg|gif|ico|svg)$/,
                 use: {
@@ -40,7 +40,8 @@ module.exports = {
         port: 5000,
     },
     resolve: {
-      extensions: [ '.tsx', '.ts', '.js' ]
+        modules: ['node_modules'],
+        extensions: [ '.js' ]
     },
     output: {
         filename: 'bundle.js',
@@ -49,7 +50,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(['dist']),
         new CopyWebpackPlugin([
-            { from: './app/img/*', to: './img', flatten: true }
+            { from: './app/img/*', to: './img', flatten: true },
+            { from: './app/agent/*', to: './agent', flatten: true }
           ]),
         new MiniCssExtractPlugin({
             filename: "./styles/[name].[contenthash].css"
