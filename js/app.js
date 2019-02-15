@@ -164,45 +164,7 @@ Events.on(engine, 'beforeUpdate', e => {
     }
 });
 
-
-let learningData = [];
-let learningLabels = [];
-let learningHash = new Map();
-
-function recordLearningData(sensorData, action) {
-    let sensorHash = Math.round(sensorData.reduce((x, y) => x + y, 0) * 10e8);
-    let hashBucket = learningHash.get(sensorHash);
-    let result = false;
-    if (hashBucket) {
-        let found = true;
-        for (var i = 0; i < hashBucket.length; i++) {
-            found = true;
-            let hashBucketItem = hashBucket[i];
-            for (var j = 0; j < sensorData.length; j++) {
-                if (sensorData[j] !== hashBucketItem[j]) {
-                    found = false;
-                    break;
-                }
-            }
-            if (found) {
-                break;
-            }
-        }
-        if (!found) {
-            hashBucket.push(sensorData);
-            result = true;
-        } 
-    } else {
-        hashBucket = [sensorData];
-        learningHash.set(sensorHash, hashBucket);
-        result = true;
-    }
-    if (result) {        
-        learningData.push(sensorData)
-        learningLabels.push(action);
-    }
-    return result;
-}
+let trainingData = new TrainingData();
 
 const keys = new Set();
 
@@ -258,20 +220,37 @@ function keyboardHandler() {
     action = moveAction * turnActions.length + turnAction;
     if (action !== 0 && isRecording) {
         let sensorData = car.sensorData.map(s => s.distanceRel);
-        if (recordLearningData(sensorData, action)) {
-            $('#learnedIterations').text(`${learningData.length} position${learningData.length === 1 ? '' : 's'} ${learningData.length === 1 ? 'has' : 'have'}`);
+        if (trainingData.add(sensorData, action)) {
+            $('#learnedIterations').text(`${trainingData.length} position${trainingData.length === 1 ? '' : 's'} ${trainingData.length === 1 ? 'has' : 'have'}`);
         }
     }
     return result;
 }
 
+const trail = [];
+const MAX_TRAIL_LENGTH = 300;
+
 Events.on(render, 'afterRender', function() {
+    if (carBody.speed > 0.1) {
+        trail.push({
+            rightWheel: Vector.clone(carBody.vertices[1]),
+            leftWheel: Vector.clone(carBody.vertices[2])
+        });
+    }
     let sensorData = car.sensorData;
     if (!sensorData) {
         return;
     }
     let context = render.context;
     Render.startViewTransform(render);
+    context.fillStyle = mainColor;
+    for (let i = 0; i < trail.length; i++) {
+        let trailItem = trail[i];
+        context.fillRect(trailItem.rightWheel.x, trailItem.rightWheel.y, 1, 1);
+        context.fillRect(trailItem.leftWheel.x, trailItem.leftWheel.y, 1, 1);
+    }
+
+
     if (showSpotlight) {        
         context.fillStyle = mainColor;
         context.beginPath();
@@ -307,6 +286,9 @@ Events.on(render, 'afterRender', function() {
         context.stroke();
     }
     Render.endViewTransform(render);
+    if (trail.length > MAX_TRAIL_LENGTH) {
+        trail.shift();
+    }
 }); 
 
 // Fit the render viewport to the scene
@@ -337,7 +319,7 @@ function toggleRecording(on) {
     let btn = $('#recording');   
     isRecording = typeof on === 'undefined' ? !isRecording : on;
     btn.toggleClass('on', isRecording);
-    let enableRecordingContainer = isRecording || learningData.length;
+    let enableRecordingContainer = isRecording || trainingData.length;
     $('.recording-container *').prop('disabled', !enableRecordingContainer);
 }
 
@@ -462,7 +444,7 @@ $('#recording').click(e => {
 });
 
 $('#applyModel').click(async () => {
-    if (!learningData.length) {
+    if (!trainingData.length) {
         return;
     }
     const epochs = 40;
@@ -485,8 +467,8 @@ $('#applyModel').click(async () => {
             loss: 'categoricalCrossentropy',
             optimizer: 'sgd'
         });
-        const xs = tf.tensor2d(learningData, [learningData.length, totalSensors]);
-        const ys = tf.tidy(() => tf.oneHot(tf.tensor1d(learningLabels, 'int32'), moveActions.length * turnActions.length));
+        const xs = tf.tensor2d(trainingData.data, [trainingData.length, totalSensors]);
+        const ys = tf.tidy(() => tf.oneHot(tf.tensor1d(trainingData.labels, 'int32'), moveActions.length * turnActions.length));
         await model.fit(xs, ys, {
             epochs: epochs,
             yieldEvery : 'epoch'
@@ -511,9 +493,7 @@ $('#discardModel').click(() => {
         currentModel.dispose();
         currentModel = null;
     }
-    learningData.length = 0;
-    learningHash.clear();
-    learningLabels.length = 0;
+    trainingData.clear();
     toggleAutoMove(false);
     $('#learnedIterations').text('No positions have');
 });
