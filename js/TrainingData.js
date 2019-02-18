@@ -53,4 +53,23 @@ class TrainingData {
         this._hashset.clear();
         this.length = 0;
     }
+
+    toJson() {
+        return JSON.stringify({
+            data: this.data,
+            labels: this.labels
+        });
+    }
+
+    fromJson(json) {
+        if (json.data 
+            && Array.isArray(json.data)
+            && json.labels 
+            && Array.isArray(json.labels)) {
+                this.clear();
+                for (var i = 0; i < json.data.length; i++) {
+                    this.add(json.data[i], json.labels[i]);
+                }
+            }
+    }
 }

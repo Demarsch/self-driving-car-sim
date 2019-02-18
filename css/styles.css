@@ -360,3 +360,21 @@ body {
     font-size: 1.2rem;
     margin: auto 0;
 }
+
+.btn-primary {
+    background-color: #4c1daa;
+    border-color: #4c1daa;
+}
+
+.btn-primary:disabled {
+    background-color: #6223df;
+    border-color: #6223df;
+}
+
+.modal-footer,.modal-body {
+    padding: 0.5rem 0.75rem;
+}
+
+#loadModelModal .modal-content {
+    padding: 0.75rem;
+}

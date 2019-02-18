@@ -27,6 +27,7 @@ let isRecording = false;
 let isMoving = false;
 let showSensors = false;
 let showSpotlight = false;
+let showTrace = true;
 let showOverlay = true;
 
 let Engine = Matter.Engine,
@@ -227,12 +228,12 @@ function keyboardHandler() {
     return result;
 }
 
-const trail = [];
-const MAX_TRAIL_LENGTH = 300;
+const trace = [];
+const MAX_TRAIL_LENGTH = 350;
 
 Events.on(render, 'afterRender', function() {
-    if (carBody.speed > 0.1) {
-        trail.push({
+    if (carBody.speed > 0.1 && showTrace) {
+        trace.push({
             rightWheel: Vector.clone(carBody.vertices[1]),
             leftWheel: Vector.clone(carBody.vertices[2])
         });
@@ -243,14 +244,15 @@ Events.on(render, 'afterRender', function() {
     }
     let context = render.context;
     Render.startViewTransform(render);
-    context.fillStyle = mainColor;
-    for (let i = 0; i < trail.length; i++) {
-        let trailItem = trail[i];
-        context.fillRect(trailItem.rightWheel.x, trailItem.rightWheel.y, 1, 1);
-        context.fillRect(trailItem.leftWheel.x, trailItem.leftWheel.y, 1, 1);
+    if (showTrace) {
+        context.fillStyle = mainColor;
+        for (let i = 0; i < trace.length; i++) {
+            let trailItem = trace[i];
+            context.fillStyle = `rgba(76, 29, 170, ${(MAX_TRAIL_LENGTH - trace.length + i) / MAX_TRAIL_LENGTH})`;
+            context.fillRect(trailItem.rightWheel.x, trailItem.rightWheel.y, 1, 1);
+            context.fillRect(trailItem.leftWheel.x, trailItem.leftWheel.y, 1, 1);
+        }
     }
-
-
     if (showSpotlight) {        
         context.fillStyle = mainColor;
         context.beginPath();
@@ -286,8 +288,8 @@ Events.on(render, 'afterRender', function() {
         context.stroke();
     }
     Render.endViewTransform(render);
-    if (trail.length > MAX_TRAIL_LENGTH) {
-        trail.shift();
+    if (trace.length > MAX_TRAIL_LENGTH) {
+        trace.shift();
     }
 }); 
 
@@ -307,6 +309,15 @@ function toggleSpotlight(on) {
     let btn = $('#spotlight');    
     showSpotlight = typeof on === 'undefined' ? !showSpotlight : on;
     btn.toggleClass('on', showSpotlight);
+}
+
+function toggleTrace(on) {
+    let btn = $('#trace');    
+    showTrace = typeof on === 'undefined' ? !showTrace : on;
+    btn.toggleClass('on', showTrace);
+    if (!showTrace) {
+        trace.length = 0;
+    }
 }
 
 function toggleAutoMove(on) {
@@ -340,8 +351,8 @@ $('#explosion').click(() => {
     var forceMagnitude = obstacleMass / 50;
     for (let obstacle of obstacles) {
         Body.applyForce(obstacle, obstacle.position, {
-            x: (forceMagnitude + Common.random() * forceMagnitude) * Common.choose([1, -1]), 
-            y: -forceMagnitude + Common.random() * -forceMagnitude * Common.choose([1, -1])
+            x: forceMagnitude * Common.choose([1, -1]), 
+            y: forceMagnitude * Common.choose([1, -1])
         });        
     }
 });
@@ -427,6 +438,10 @@ $('#spotlight').click(() => {
     toggleSpotlight();
 });
 
+$('#trace').click(() => {
+    toggleTrace();
+});
+
 $('#move').click(() => {
     toggleAutoMove();
 });
@@ -496,6 +511,84 @@ $('#discardModel').click(() => {
     trainingData.clear();
     toggleAutoMove(false);
     $('#learnedIterations').text('No positions have');
+});
+
+const saveModelModal = $('#saveModelModal');
+const loadModelModal = $('#loadModelModal');
+
+saveModelModal.find('input[type="text"]').on('input', e => {
+    let text = $(e.target).val();
+    $('#confirmSaveModel').prop('disabled', text ? false : true);
+});
+
+$('#confirmSaveModel').click(async () => {
+    let name = saveModelModal.find('input[type="text"]').val();
+    currentModel.save(`downloads://${name}`);
+
+    if (trainingData.length) {
+        var data = "text/json;charset=utf-8," + encodeURIComponent(trainingData.toJson());
+        let link = $(`<a href="data:${data}" download="${name}.training-data.json">download JSON</a>`).appendTo($('body'));
+        link[0].click();
+        link.remove();
+    }
+
+    saveModelModal.modal('hide');
+});
+
+$('#cancelSaveModel').click(() => {
+    saveModelModal.modal('hide');
+});
+
+$('#saveModel').click(() => {
+    if (currentModel == null) {
+        return;
+    }
+    saveModelModal.modal('show');
+});
+
+$('#loadModel').click(() => {
+    loadModelModal.find('input[type="file"]').val(null);
+    loadModelModal.modal('show');
+});
+
+loadModelModal.find('input[type="file"]').change(() => {
+    let hasModelFile = $('#loadModelFileInput')[0].files.length > 0;
+    let hasWeightsFile = $('#loadWeightsFileInput')[0].files.length > 0;
+    $('#confirmLoadModel').prop('disabled', !hasModelFile || !hasWeightsFile);
+});
+
+$('#confirmLoadModel').click(async () => {
+    let modelFile = $('#loadModelFileInput')[0].files[0];
+    let weightsFile = $('#loadWeightsFileInput')[0].files[0];
+    let trainingDataFile = $('#loadTrainingDataFileInput')[0].files[0];
+    loadModelModal.modal('hide');
+    if (!modelFile || !weightsFile) {
+        return;
+    }
+    try {
+        const loadedModel = await tf.loadModel(tf.io.browserFiles([modelFile, weightsFile]))
+        currentModel = loadedModel;
+        console.log('Loaded model');
+        if (trainingDataFile) {
+            fr = new FileReader();
+            fr.onload = e => {
+                let lines = e.target.result;
+                let newTrainingData = JSON.parse(lines);
+                trainingData.fromJson(newTrainingData);
+                $('#learnedIterations').text(`${trainingData.length} position${trainingData.length === 1 ? '' : 's'} ${trainingData.length === 1 ? 'has' : 'have'}`);
+                console.log('Loaded training data');
+                
+            };
+            fr.readAsText(trainingDataFile);
+        }
+    }
+    catch {
+        alert('Failed to upload model')
+    }
+});
+
+$('#cancelLoadModel').click(() => {
+    loadModelModal.modal('hide');
 });
 
 $('#toggleToolbarButton').click(() => {

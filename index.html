@@ -24,6 +24,7 @@
         <div class="separator"></div>
         <button id="sensors" class="btn" title="Toggle car sensors"><img src="img/sensor.png"></button>
         <button id="spotlight" class="btn" title="Toggle spotlight mode"><img src="img/spotlight.png"></button>
+        <button id="trace" class="btn on" title="Toggle trace"><img src="img/trace.png"></button>
         <button id="move" class="btn" title="Run auto-movement"><img src="img/move.png"></button>
         <div class="separator"></div>
         <button id="recording" class="btn" title="Start/pause/resume recording of user actions"><img src="img/recording.png"></button>
@@ -34,6 +35,8 @@
                 <span id="learnedIterations">No positions have</span> been learned so far
             </div>  
         </div>      
+        <button id="saveModel" class="btn" title="Save car and training data"><img src="img/download.png"></button>
+        <button id="loadModel" class="btn" title="Load car and training data"><img src="img/upload.png"></button>
         <div class="separator"></div>
         <button id="help" class="btn" title="Help &amp; about"><img src="img/information.png"></button>
     </nav>
@@ -84,7 +87,44 @@
             </div>
           </div>
         </div>
-      </div>
+    </div>
+    
+    <div id="saveModelModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-body">
+                <input class="form-control" type="text" placeholder="Enter name of the car">
+            </div>
+            <div class="modal-footer">
+                <button id="confirmSaveModel" type="button" class="btn btn-primary" data-dismiss="modal" disabled="true">Download</button>
+                <button id="cancelSaveModel" type="button" class="btn btn-secondary">Cancel</button>
+              </div>
+          </div>
+        </div>
+    </div>
+    
+    <div id="loadModelModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="form-group">
+                <label for="loadModelFileInput">Model file (&lt;Your Car&gt;.json)</label>
+                <input type="file" class="form-control-file" id="loadModelFileInput">
+            </div>
+            <div class="form-group">
+                <label for="loadWeightsFileInput">Weights file (&lt;Your Car&gt;.weights.bin)</label>
+                <input type="file" class="form-control-file" id="loadWeightsFileInput">
+            </div>
+            <div class="form-group">
+                <label for="loadTrainingDataFileInput">(optional) Trainig data file (&lt;Your Car&gt;.training-data.json)</label>
+                <input type="file" class="form-control-file" id="loadTrainingDataFileInput">
+            </div>
+            <div class="modal-footer">
+                <button id="confirmLoadModel" type="button" class="btn btn-primary" data-dismiss="modal" disabled="true">Load</button>
+                <button id="cancelLoadModel" type="button" class="btn btn-secondary">Cancel</button>
+              </div>
+          </div>
+        </div>
+    </div>
 </body>
 <script src="js/car.js"></script>
 <script src="js/TrainingData.js"></script>
