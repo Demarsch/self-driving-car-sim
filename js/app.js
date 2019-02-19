@@ -12,7 +12,7 @@ const carHeight = 50;
 const carRestitution = 0.3;
 const carFriction = 0.05;
 //We want the car to move smoothly, but to process car state less frequently
-let tickFrequency = 50;
+let tickFrequency = 80;
 const velocityIncrement = 0.002;
 const angleIncrement = 0.0275;
 const fovDistance = 200;
@@ -452,10 +452,6 @@ $('#recording').click(e => {
     if (isRecording) {
         toggleAutoMove(false);
         toggleSensors(true);
-        if (currentModel) {
-            currentModel.dispose();
-            currentModel = null;
-        }
     }
 });
 
@@ -612,4 +608,10 @@ tf.loadModel('./agent/trained-agent.json')
     .catch(e => {
         console.log('Failed to load model');
         console.log(e);
+    });
+
+$.getJSON('./agent/trained-agent.training-data.json')
+    .done(d => {
+        trainingData.fromJson(d);
+        $('#learnedIterations').text(`${trainingData.length} position${trainingData.length === 1 ? '' : 's'} ${trainingData.length === 1 ? 'has' : 'have'}`);
     });
