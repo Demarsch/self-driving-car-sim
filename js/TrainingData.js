@@ -1,4 +1,4 @@
-const EPSILON = 10e-4;
+const EPSILON = 10e-3;
 
 class TrainingData {
 
@@ -10,7 +10,7 @@ class TrainingData {
     }
 
     add(dataItem, label) {
-        const hash = Math.round(dataItem.reduce((x, y) => x + y, 0) * 10e8);
+        const hash = Math.round(dataItem.reduce((x, y) => x + y, 0) * 10e3);
         let bucket = this._hashset.get(hash);
         let result = false;
         if (bucket) {

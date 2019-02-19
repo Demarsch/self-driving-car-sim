@@ -14,13 +14,13 @@ const carFriction = 0.05;
 //We want the car to move smoothly, but to process car state less frequently
 let tickFrequency = 50;
 const velocityIncrement = 0.002;
-const angleIncrement = 0.025;
+const angleIncrement = 0.0275;
 const fovDistance = 200;
 //FoV angle in radians. Centered around cars front
-const frontAngle = Math.PI / 4;
+const frontAngle = Math.PI / 3;
 const rearAngle = Math.PI / 4;
-const frontSensors = 9;
-const rearSensors = 9;
+const frontSensors = 18;
+const rearSensors = 0;
 const totalSensors = frontSensors + rearSensors;
 
 let isRecording = false;
@@ -263,11 +263,12 @@ Events.on(render, 'afterRender', function() {
     if (showSensors) {
         for (let i = 0; i < sensorData.length; i++) {
             let sensor = sensorData[i];
+            let isFrontSensor = Math.abs(sensor.angle) <= Math.PI / 15;
             if (sensor.collides) {
-                context.fillStyle = 'red';                
+                context.fillStyle = isFrontSensor ? 'red' : 'pink';                
                 context.fillRect(sensor.point.x - 4, sensor.point.y - 4, 5, 5);
             } else {
-                context.fillStyle = mainColor;                
+                context.fillStyle = isFrontSensor ? mainColor : 'darkgray';                
                 context.fillRect(sensor.point.x - 2, sensor.point.y - 2, 3, 3);
             }
         }

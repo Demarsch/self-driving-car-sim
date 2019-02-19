@@ -13,7 +13,7 @@ class Car {
         this._fovDistance = options.fovDistance || 150;
         this._frontSensors = options.frontSensors || 9;
         this._frontAngle = options.frontAngle || Math.PI / 2;
-        this._rearSensors = options.rearSensors || 9;
+        this._rearSensors = options.rearSensors || 0;
         this._rearAngle = options.rearAngle || Math.PI / 2;
         this._frontAngles = [];
         this._rearAngles = [];
@@ -24,22 +24,20 @@ class Car {
         let deltaAngle = angle / this._frontSensors;
         for (let i = 0; i < this._frontSensors; i++) {
             this.sensorData.push({ point: { x: 0, y: 0 }});
-            this._frontAngles.push({
-                angle: -halfAngle + i * deltaAngle,
-                index: i
-            });
+            this._frontAngles.push(-halfAngle + i * deltaAngle);
         }        
 
         angle = this._rearAngle;
         halfAngle = angle / 2;
-        deltaAngle = angle / this._rearSensors;
+        deltaAngle = this._rearSensors ? angle / this._rearSensors : 0;
         for (let i = 0; i < this._rearSensors; i++) {
             this.sensorData.push({ point: { x: 0, y: 0 }});
-            this._rearAngles.push({
-                angle: -halfAngle + i * deltaAngle,
-                index: i
-            });
+            this._rearAngles.push(-halfAngle + i * deltaAngle);
         }        
+    }
+
+    getForwardVector() {
+        return this.body.axes[1];
     }
 
     _onAction() {        
@@ -75,11 +73,12 @@ class Car {
         let totalSensors = this._frontSensors + this._rearSensors;
         for (let i = 0; i < totalSensors; i++) {
             let deltaAngle = i < this._frontSensors
-                ? this._frontAngles[i].angle
-                : Math.PI + this._rearAngles[i - this._frontSensors].angle;
+                ? this._frontAngles[i]
+                : Math.PI + this._rearAngles[i - this._frontSensors];
             let vFov = Vector.add(Vector.rotate(vForward, deltaAngle), this.body.position);
             let collisions = raycast(obstacles, this.body.position, vFov);
             let sensorItem = sensorData[i];
+            sensorItem.angle = deltaAngle;
             if (collisions.length === 0) {
                 sensorItem.collides = false;
                 sensorItem.point = vFov;
@@ -91,11 +90,9 @@ class Car {
                 sensorItem.collides = true;
                 sensorItem.point = collision.point;
                 sensorItem.distance = distance;
-                sensorItem.distanceRel = distance / this._fovDistance;
+                //We don't need the extreme precision here as 1 screen pixel is approx. 0.005 of the FoV distance
+                sensorItem.distanceRel = Math.round(distance * 10e2 / this._fovDistance) / 10e2;
             }
-        }
-        for (let i = 0; i < this._rearAngles.length; i++) {
-
         }
         this.sensorData = sensorData;
         return sensorData;
