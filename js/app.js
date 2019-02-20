@@ -221,9 +221,7 @@ function keyboardHandler() {
     action = moveAction * turnActions.length + turnAction;
     if (action !== 0 && isRecording) {
         let sensorData = car.sensorData.map(s => s.distanceRel);
-        if (trainingData.add(sensorData, action)) {
-            $('#learnedIterations').text(`${trainingData.length} position${trainingData.length === 1 ? '' : 's'} ${trainingData.length === 1 ? 'has' : 'have'}`);
-        }
+        trainingData.add(sensorData, action);
     }
     return result;
 }
@@ -507,7 +505,6 @@ $('#discardModel').click(() => {
     }
     trainingData.clear();
     toggleAutoMove(false);
-    $('#learnedIterations').text('No positions have');
 });
 
 const saveModelModal = $('#saveModelModal');
@@ -572,7 +569,6 @@ $('#confirmLoadModel').click(async () => {
                 let lines = e.target.result;
                 let newTrainingData = JSON.parse(lines);
                 trainingData.fromJson(newTrainingData);
-                $('#learnedIterations').text(`${trainingData.length} position${trainingData.length === 1 ? '' : 's'} ${trainingData.length === 1 ? 'has' : 'have'}`);
                 console.log('Loaded training data');
                 
             };
@@ -611,7 +607,4 @@ tf.loadModel('./agent/trained-agent.json')
     });
 
 $.getJSON('./agent/trained-agent.training-data.json')
-    .done(d => {
-        trainingData.fromJson(d);
-        $('#learnedIterations').text(`${trainingData.length} position${trainingData.length === 1 ? '' : 's'} ${trainingData.length === 1 ? 'has' : 'have'}`);
-    });
+    .done(d => trainingData.fromJson(d));

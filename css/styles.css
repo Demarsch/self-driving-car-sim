@@ -310,7 +310,6 @@ body {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-right: 0.5rem;
 }
 
 .dropdown-menu {
@@ -353,12 +352,6 @@ body {
     width: 3px;
     align-self: stretch;
     margin: 0.25rem 0;
-}
-
-.learned-iterations {
-    white-space: nowrap;
-    font-size: 1.2rem;
-    margin: auto 0;
 }
 
 .btn-primary {
